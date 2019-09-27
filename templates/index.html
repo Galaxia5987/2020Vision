@@ -1,0 +1,87 @@
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <style>
+        img {
+            max-width: 500px;
+            max-height: 500px;
+        }
+
+        /*https://www.w3schools.com/css/css3_buttons.asp*/
+        .green_button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .red_button {
+            background-color: red;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        h1 {
+            font-family: Roboto;
+        }
+
+    </style>
+    <title>Video Stream</title>
+</head>
+<body>
+<script>
+
+    //Send post request to save endpoint
+    function save() {
+        var http = new XMLHttpRequest();
+        http.open('POST', window.location.origin + "/save", true);
+        http.send();
+    }
+
+    //Send post request to update endpoint with the target name as the data
+    function update() {
+        var http = new XMLHttpRequest();
+        http.open('POST', window.location.origin + "/update", true);
+        http.send(document.getElementById("target").value);
+    }
+
+    function record() {
+        var endpoint = "/record"
+        if (document.getElementById("record").innerHTML === "Record") {
+            document.getElementById("record").setAttribute("class", "red_button")
+            document.getElementById("record").innerHTML = "Stop recording"
+        } else {
+            document.getElementById("record").setAttribute("class", "green_button")
+            document.getElementById("record").innerHTML = "Record"
+            endpoint = "/stopRecording"
+        }
+
+        var http = new XMLHttpRequest();
+        http.open('POST', window.location.origin + endpoint, true);
+        http.send(document.getElementById("filename").value);
+    }
+
+
+</script>
+<h1>Video Stream</h1>
+<img src="{{ url_for('video_feed') }}">
+<br>
+<br>
+<h1>Controls</h1>
+Target: <input type="text" id="target">
+File name: <input type="text" id="filename" value="{{ initial_filename }}">
+<br><br>
+<button class="green_button" onclick="save()">Save</button>
+<button class="green_button" onclick="update()">Update</button>
+<button class="green_button" id="record" onclick="record()">Record</button>
+</body>
+</html>
