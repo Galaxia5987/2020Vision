@@ -4,12 +4,12 @@ from file import File
 class FileHSV:
     """HSV value handler that loads values from a file."""
 
-    def __init__(self, name):
+    def __init__(self, name, up=0):
         """
         Instantiate a HSV value handler.
         :param name: Target name
         """
-        self.file = File(name, {'H': (0, 255), 'S': (0, 255), 'V': (0, 255)}, 'hsv', 'json')
+        self.file = File(name, {'H': (0, 255), 'S': (0, 255), 'V': (0, 255)}, 'hsv', 'json', up)
         self.hsv_values = self.file.load_file()
 
     def save_hsv_values(self):

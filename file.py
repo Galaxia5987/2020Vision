@@ -6,7 +6,7 @@ from typing import Callable
 class File:
     """Handles reading and writing files."""
 
-    def __init__(self, name: str, default, folder: str, extension):
+    def __init__(self, name: str, default, folder: str, extension, up=0):
         """
         Instantiate a file.
         :param name: The name of the target
@@ -17,13 +17,18 @@ class File:
         self.default = default
         self.folder = folder
         self.extension = extension
+        self.up = up
 
     def get_filename(self) -> str:
         """
         Format filename.
         :return: The filename in a folder/name.extension format
         """
-        return '{}/{}.{}'.format(self.folder, self.name, self.extension)
+        filename = '{}/{}.{}'.format(self.folder, self.name, self.extension)
+
+        for _ in range(self.up):
+            filename = '../' + filename
+        return filename
 
     def save_file(self, data):
         """
