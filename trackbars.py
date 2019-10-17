@@ -23,23 +23,6 @@ class Trackbars:
         - corresponds to the target under name
         - if such a file does not exist, creates it, and writes an open HSV range into it (low values set to 0, high
         values set to 255)
-
-    Methods
-    -------
-    save_hsv_values()
-        Saves current HSV values on trackbars to self.file.
-    reload_trackbars()
-        Reloads trackbars from self.file.
-        Uses: Called when selecting a new target, and self.file changes.
-        See: load_file in file.py
-    create_trackbars()
-        Creates trackbars, and sets the values found in self.file.
-        Uses: Called when a new Trackbars object is created, when the main target loop is first launched.
-        See: main.py
-    get_hsv()
-        :returns HSV values in the self.file dictionary format.
-        Uses: Gets HSV values for mask filtering, saves HSV values to file.
-        See: save_hsv_values(), loop() in main.py
     """
 
     def __init__(self, name: str):
