@@ -9,81 +9,101 @@ import imutils
 import numpy as np
 
 
-def index0(x):
+def index0(x: iter):
     """
-    An index function for sorting based on the first variable.
-    :param x:
-    :return:
+    An index function for sorting based on the first variable. Generally is passed as a parameter itself, and isn't
+    called on its own.
+    :param x: An iterable variable with a length of at least 1.
+    :return: The first variable in x.
     """
     return x[0]
 
 
-def index00(x):
+def index00(x: iter):
     """
-    An index function for sorting based on the first variable of the first variable.
-    :param x:
-    :return:
+    An index function for sorting based on the first variable in the first variable. Generally is passed as a parameter
+    itself, and isn't called on its own.
+
+    Uses: Sorting lists of coordinates or points.
+
+    :param x: An iterable variable, whose first variable is also iterable, both iterables with a length of at least 1.
+    :return: The first variable in the first variable of x.
     """
     return x[0][0]
 
 
-def index1(x):
+def index1(x: iter):
     """
-    An index function for sorting based on the second variable.
-    :param x:
-    :return:
+    An index function for sorting based on the second variable. Generally is passed as a parameter itself, and isn't
+    called on its own.
+
+    Uses: Sorting lists of coordinates or points.
+
+    :param x: An iterable variable with a length of at least 2.
+    :return: The second variable in x.
     """
     return x[1]
 
 
-def index01(x):
+def index01(x: iter):
     """
-    An index function for sorting based on the second variable.
-    :param x:
-    :return:
+    An index function for sorting based on the second variable in the first variable. Generally is passed as a parameter
+    itself, and isn't called on its own.
+
+    Uses: Sorting lists of coordinates or points.
+
+    :param x: An iterable variable, whose first variable is also iterable, both iterables with a length of at least 2.
+    :return: The second variable in the first variable of x.
     """
     return x[0][1]
 
 
-def aspect_ratio(cnt) -> float:
+def aspect_ratio(cnt: np.array) -> float:
     """
-    Calculate aspect ratio of given contour.
-    :param cnt: A contour
-    :return: Aspect ratio
+    Calculate aspect ratio of given contour, width over height.
+
+    :param cnt: A contour.
+    :return: The aspect ratio of the contour, width over height.
     """
-    x, y, w, h = cv2.boundingRect(cnt)
+    _, _, w, h = cv2.boundingRect(cnt)  # Omitted: x, y as they are not useful for this calculation.
     return w / h
 
 
-def rotated_aspect_ratio(cnt) -> float:
+def rotated_aspect_ratio(cnt: np.array) -> float:
     """
-    Calculate aspect ratio of given contour, based on a rotated rectangle instead of an upright one.
-    :param cnt: A contour
-    :return: Width / Height
+    Calculate aspect ratio of given contour, width over height, based on a rotated rectangle instead of an upright one.
+
+    :param cnt: A contour.
+    :return: The aspect ratio of the contour, width over height.
     """
     return width(cnt)[0] / height(cnt)[0]
 
 
-def reversed_rotated_aspect_ratio(cnt) -> float:
+def reversed_rotated_aspect_ratio(cnt: np.array) -> float:
     """
-    Calculate aspect ratio of given contour, based on a rotated rectangle instead of an upright one.
-    :param cnt: A contour
-    :return: Height / Width
+    Calculate aspect ratio of given contour, height over width, based on a rotated rectangle instead of an upright one.
+
+    :param cnt: A contour.
+    :return: The aspect ratio of the contour, height over width.
     """
     return height(cnt)[0] / width(cnt)[0]
 
 
-def height(cnt) -> Tuple[float, Tuple[int, int], Tuple[int, int]]:
+def height(cnt: np.array) -> Tuple[float, Tuple[int, int], Tuple[int, int]]:
     """
     Find the height of the box bounding the contour.
-    :param cnt: A contour
-    :return: Min area rectangle height
+
+    Uses: Aspect ratios based on rotated rectangles instead of straight ones.
+    See: rotated_aspect_ratio(cnt), reversed_rotated_aspect_ratio(cnt), index0(x), box(cnt)
+
+    :param cnt: A contour.
+    :return: The height, top left point, and bottom right point of the bounding rotated rectangle.
     """
     points = []
-    for p in box(cnt):
+    for p in box(cnt):  # Receive rotated rectangle points from box(cnt).
         points.append(p)
 
-    points.sort(key=index0)
+    points.sort(key=index0)  # Sort based on index0(x).
 
     x1, y1 = points[0]
     x2, y2 = points[1]
@@ -93,15 +113,19 @@ def height(cnt) -> Tuple[float, Tuple[int, int], Tuple[int, int]]:
 
 def width(cnt) -> Tuple[float, Tuple[int, int], Tuple[int, int]]:
     """
-    Find the weight of the box bounding the contour.
-    :param cnt: A contour
-    :return: Min area rectangle weight
+    Find the width of the box bounding the contour.
+
+    Uses: Aspect ratios based on rotated rectangles instead of straight ones.
+    See: rotated_aspect_ratio(cnt), reversed_rotated_aspect_ratio(cnt), index1(x), box(cnt)
+
+    :param cnt: A contour.
+    :return: The width, top left point, and bottom right point of the bounding rotated rectangle.
     """
     points = []
-    for p in box(cnt):
+    for p in box(cnt):  # Receive rotated rectangle points from box(cnt).
         points.append(p)
 
-    points.sort(key=index1)
+    points.sort(key=index1)  # Sort based on index1(x).
 
     x1, y1 = points[0]
     x2, y2 = points[1]
@@ -109,10 +133,11 @@ def width(cnt) -> Tuple[float, Tuple[int, int], Tuple[int, int]]:
     return math.hypot(abs(x1 - x2), abs(y1 - y2)), (x1, y1), (x2, y2)
 
 
-def box(cnt) -> np.array:
+def box(cnt: np.array) -> np.array:
     """
     Return a list of the points of the minimum area rectangle bounding the contour.
-    :param cnt: A contour
+
+    :param cnt: A contour.
     :return: List of 4 points in an [x, y] format
     """
     rect = cv2.minAreaRect(cnt)
@@ -506,6 +531,7 @@ def put_number(number, x: int, y: int, image):
     if number is not None:
         cv2.putText(image, str(int(number)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
 
+
 def bounding_box_coords(bounding_box, frame):
     cols = frame.shape[1]
     rows = frame.shape[0]
@@ -514,3 +540,26 @@ def bounding_box_coords(bounding_box, frame):
     y1 = bounding_box[0] * rows
     y2 = bounding_box[2] * rows
     return x1, x2, y1, y2
+
+
+if __name__ == "__main__":
+    functions = dir()
+    print('List of functions in utils:')  # Print all functions in file.
+    print('\tType\t\tName')
+    print('---------------------------')
+    for func in functions:
+        if func[0] == func[0].lower() and func[0] is not '_':
+            to_print = f'{func}'
+            try:
+                __import__(func)
+                to_print = '|   import\t\t' + to_print
+                print(to_print)
+            except:
+                to_print = '|   function\t' + to_print
+                print(to_print)
+    while True:
+        try:
+            inquiry = input('What would you like help with? ')
+            help(eval(inquiry))
+        except:
+            continue
