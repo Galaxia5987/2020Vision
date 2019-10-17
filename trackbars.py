@@ -99,6 +99,10 @@ class Trackbars:
         high_v = cv2.getTrackbarPos('highV', 'HSV')
         return {'H': (low_h, high_h), 'S': (low_s, high_s), 'V': (low_v, high_v)}
 
+    def change_hsv(self,values):
+        new_HSV = {'H':[values[0],values[1]],'S':[values[3],values[4]],"V":[values[5],values[6]]}
+        self.file.save_file(new_HSV)
 
 if __name__ == "__main__":
     help(Trackbars)
+
