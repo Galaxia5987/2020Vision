@@ -4,9 +4,52 @@ from file import File
 
 
 class Trackbars:
-    """This class handles the trackbar window that allows us to change and set the HSV values."""
+    """
+    This class handles the trackbar window that allows us to change and set the HSV values.
 
-    def __init__(self, name):
+    Attributes
+    ----------
+    name : str
+        - the name of the target for which the trackbars are created, and hsv values will be saved.
+    window
+        - the window in which the trackbars will exist.
+    callback : function
+        :returns None
+        - a dry callback function for the trackbars, since OpenCv requires one but it isn't needed.
+    file : file
+        - the file from which initial HSV values will be read, and where new HSV values will be saved
+        - written in dictionary format, with the keys indicating the type of variable (h, s, or v), each holding two
+        variables (low, high)
+        - corresponds to the target under name
+        - if such a file does not exist, creates it, and writes an open HSV range into it (low values set to 0, high
+        values set to 255)
+
+    Methods
+    -------
+    save_hsv_values()
+        Saves current HSV values on trackbars to self.file.
+    reload_trackbars()
+        Reloads trackbars from self.file.
+        Uses: Called when selecting a new target, and self.file changes.
+        See: load_file in file.py
+    create_trackbars()
+        Creates trackbars, and sets the values found in self.file.
+        Uses: Called when a new Trackbars object is created, when the main target loop is first launched.
+        See: main.py
+    get_hsv()
+        :returns HSV values in the self.file dictionary format.
+        Uses: Gets HSV values for mask filtering, saves HSV values to file.
+        See: save_hsv_values(), loop() in main.py
+    """
+
+    def __init__(self, name: str):
+        """
+        Create the trackbars window, create an HSV file, and assign the HSV values corresponding to the target.
+
+        See: create_trackbars(), File class in file.py, __init__ in main.py
+
+        :param name: The name of the target. Will be used for creating, or calling, the right file.
+        """
         self.name = name
         self.window = cv2.namedWindow('HSV')  # Create window
         self.callback = lambda v: None  # Dry callback for trackbars since it's not needed
@@ -14,11 +57,19 @@ class Trackbars:
         self.create_trackbars()
 
     def save_hsv_values(self):
-        """Save HSV values to correct file."""
+        """
+        Save HSV values to self.file.
+
+        See: get_hsv()
+        """
         self.file.save_file(self.get_hsv())
 
     def reload_trackbars(self):
-        """Reloads the trackbars from the file."""
+        """
+        Reload the trackbars from self.file.
+
+        Uses: Call when selecting a new target, and self.file changes.
+        """
         hsv = self.file.load_file()
         cv2.setTrackbarPos('lowH', 'HSV', hsv['H'][0])
         cv2.setTrackbarPos('highH', 'HSV', hsv['H'][1])
@@ -30,7 +81,11 @@ class Trackbars:
         cv2.setTrackbarPos('highV', 'HSV', hsv['V'][1])
 
     def create_trackbars(self):
-        """Create the trackbars intially with the value from the file."""
+        """
+        Create the trackbars intially with the value from the file.
+
+        See: load_file() in file.py
+        """
         hsv = self.file.load_file()
         # Create trackbars for color change
         cv2.createTrackbar('lowH', 'HSV', hsv['H'][0], 179, self.callback)
@@ -45,8 +100,13 @@ class Trackbars:
     @staticmethod
     def get_hsv() -> dict:
         """
-        Gets HSV values from trackbars.
-        :return: HSV values
+        Get HSV values from trackbars.
+
+        Uses: Get HSV values for mask filtering, save HSV values to file.
+        See: save_hsv_values(), loop() in main.py
+
+        :return: HSV values, in dictionary format. The keys are the 3 variables, which hold two variable for low and
+        high.
         """
         low_h = cv2.getTrackbarPos('lowH', 'HSV')
         high_h = cv2.getTrackbarPos('highH', 'HSV')
@@ -55,3 +115,7 @@ class Trackbars:
         low_v = cv2.getTrackbarPos('lowV', 'HSV')
         high_v = cv2.getTrackbarPos('highV', 'HSV')
         return {'H': (low_h, high_h), 'S': (low_s, high_s), 'V': (low_v, high_v)}
+
+
+if __name__ == "__main__":
+    help(Trackbars)
