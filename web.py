@@ -10,11 +10,31 @@ import utils
 
 
 class Web:
-    """This class handles the web server we use for streaming & control."""
+    """
+    This class handles the web server used for streaming & control.
+
+    Attributes
+    ----------
+
+    main: main.Main
+        - the main in which the target recognition loop is being run
+    app : Flask
+        - the application that will run the streaming service
+    frame
+        - the frame that is being streamed
+    resize: bool, optional
+        - whether the frame should be resized
+        - used to improve performance
+    """
 
     def __init__(self, main, resize: bool = False):
+        """
+
+        :param main: The Main in which the target recognition loop is being run.
+        :param resize: Whether the frame should be resized, False by default.
+        """
         self.main = main
-        self.app = Flask('Web')  # Flask app for web
+        self.app = Flask('Web')
         self.frame = None
         self.resize = resize
 
@@ -35,20 +55,31 @@ class Web:
 
         @self.app.route('/save', methods=['POST'])
         def save():
-            """Post route that saves HSV values."""
+            """
+            Post route that saves HSV values.
+            See: save_hsv_values() in FileHSV in file_hsv.py; save_hsv_values() in Trackbars in trackbars.py
+            """
             self.main.hsv_handler.save_hsv_values()
             return '', 204
 
         @self.app.route('/update', methods=['POST'])
         def update():
-            """Post route to change target."""
+            """
+            Post route to change target. Receive the name of the target from a string, and change the target in the
+            main.
+            See: change_name(name) in Main in main.py
+            """
             target = request.data.decode('utf-8')
             self.main.change_name(target)
             return '', 204
 
         @self.app.route('/record', methods=['POST'])
         def record():
-            """Start recording."""
+            """
+            Start recording. Receive the name of the file to record to from a string, and send an instruction to the
+            display handler to begin recording.
+            See: start_recording(title) in Display in display.py
+            """
             filename = request.data.decode('utf-8')
             if filename:
                 self.main.display.start_recording(filename)
@@ -58,14 +89,17 @@ class Web:
 
         @self.app.route('/stopRecording', methods=['POST'])
         def stop_recording():
-            """Stop recording."""
+            """
+            Stop recording. Send a message to the display handler to save the file.
+            See: stop_recording() in Display in display.py
+            """
             self.main.display.stop_recording()
             return '', 204
 
     def stream_frame(self):
         """
-        This is the generator that encodes and streams the last frame to the stream endpoint.
-        :return: JPEG encoded frame
+        A generator that encodes and streams the last frame to the stream endpoint.
+        :return: JPEG encoded frame.
         """
         while True:
             frame = self.frame
@@ -77,12 +111,18 @@ class Web:
             yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + jpg + b'\r\n')
 
     def serve(self):
-        """Start the web server."""
-        # Print out ip and port for ease of use
+        """
+        Start the web server, print out ip and port for ease of use, run flask and bind to all IPs
+        """
         logging.info('Web server: http://{}:5802'.format(utils.get_ip()))
-        # Run flask and bind to all IPs
         self.app.run('0.0.0.0', 5802, threaded=True)
 
     def start_thread(self):
-        """Run web server in a thread - daemon so it lets the program exit."""
+        """
+        Run web server in a thread - daemon so it lets the program exit.
+        """
         Thread(target=self.serve, daemon=True).start()
+
+
+if __name__ == "__main__":
+    help(Web)
