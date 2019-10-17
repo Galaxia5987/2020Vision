@@ -9,7 +9,7 @@ import constants
 class CVCamera(Thread):
     """
     Handler for cameras accessed through OpenCV functions. Receives frames in a thread, and allows changing and reading
-    a few camera configurations.
+    a few camera configurations. Extends the threading.Thread class.
 
     Attributes
     ----------
@@ -37,7 +37,7 @@ class CVCamera(Thread):
         logging.info(
             'Contrast: {} Exposure: {} FPS: {}'.format(contrast, exposure, self.camera.get(constants.CAMERA_FPS))
         )
-        super().__init__(daemon=True)  # Init thread
+        super().__init__(daemon=True)  # Initialize thread
 
     def run(self):
         """
@@ -59,7 +59,7 @@ class CVCamera(Thread):
     def set_exposure(self, exposure: int):
         """
         Set the camera exposure.
-        :param exposure: OpenCV camera exposure value.
+        :param exposure: Camera exposure value.
         """
         # TODO: Print new exposure
         self.camera.set(constants.CAMERA_EXPOSURE, exposure)
