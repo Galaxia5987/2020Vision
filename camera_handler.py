@@ -1,6 +1,8 @@
 import logging
+import time
 from abc import abstractmethod
 from threading import Thread
+from typing import Tuple
 
 
 class CameraHandler(Thread):
@@ -13,6 +15,7 @@ class CameraHandler(Thread):
         self.exit = False
         self.frame = None
         self.log('Contrast: {} Exposure: {} FPS: {}'.format(self.get_contrast(), self.get_exposure(), self.get_fps()))
+        time.sleep(0.1)  # Sleep to let the camera warm up
         super().__init__(daemon=True)  # Initialize thread
 
     @abstractmethod
@@ -22,7 +25,7 @@ class CameraHandler(Thread):
         threading, otherwise should just be called as super().
         :return: None
         """
-        super()
+        super().start()
 
     @abstractmethod
     def create_camera(self):
@@ -35,6 +38,14 @@ class CameraHandler(Thread):
     @abstractmethod
     def set_contrast(self, contrast: int):
         self.camera.contrast = contrast
+
+    @abstractmethod
+    def set_resolution(self, resolution: Tuple[int, int]):
+        self.camera.resolution = resolution
+
+    @abstractmethod
+    def set_fps(self, framerate):
+        self.camera.framerate = framerate
 
     @abstractmethod
     def get_exposure(self):
