@@ -1,7 +1,5 @@
 from camera_handler import CameraHandler
-
 import cv2
-
 import constants
 
 
@@ -27,6 +25,17 @@ class CVCamera(CameraHandler):
         self.port = port
         super().__init__(exposure, contrast)
 
+    def start(self) -> None:
+        super().start()
+
+    def run(self):
+        """
+        Implementation of Thread.run(). Stores current frame in the class variable. Breaks if exit flag is raised.
+
+        See: run() in CameraHandler in camera_handler.py
+        """
+        super().run()
+
     def create_camera(self):
         """
         Start the camera on the desired port.
@@ -37,7 +46,7 @@ class CVCamera(CameraHandler):
         """
         Release the camera and allow it to be used again. Raise exit flag to signal the thread to stop.
         """
-        super()
+        super().release()
         self.camera.release()
 
     def set_exposure(self, exposure: int):
@@ -46,7 +55,7 @@ class CVCamera(CameraHandler):
         :param exposure: Exposure value to set.
         """
         self.camera.set(constants.CAMERA_EXPOSURE, exposure)
-        self.log(self.get_exposure())
+        self.log('New exposure: {}'.format(self.get_exposure()))
 
     def set_contrast(self, contrast: int):
         """
@@ -54,20 +63,33 @@ class CVCamera(CameraHandler):
         :param contrast: Contrast value to set.
         """
         self.camera.set(constants.CAMERA_CONTRAST, contrast)
-        self.log(self.get_contrast())
+        self.log('New contrast: {}'.format(self.get_contrast()))
 
     def get_exposure(self):
+        """
+        Read the camera's exposure value using OpenCV.
+        :return: Current exposure of the camera.
+        """
         return self.camera.get(constants.CAMERA_EXPOSURE)
 
     def get_contrast(self):
+        """
+        Read the camera's contrast value using OpenCV.
+        :return: Current contrast of the camera.
+        """
         return self.camera.get(constants.CAMERA_CONTRAST)
 
     def get_fps(self):
+        """
+        Read the camera's max FPS value using OpenCV. Actual FPS calculated in main.
+        :return: Current FPS of the camera.
+        """
         return self.camera.get(constants.CAMERA_FPS)
 
     def get_resolution(self):
         """
-        :return: The resolution of the camera's frame. Derived from constants.
+        Derived from constants.
+        :return: The resolution of the camera's frame.
         """
         # TODO: Make dynamic
         return int(self.camera.get(constants.CAMERA_WIDTH)), int(self.camera.get(constants.CAMERA_HEIGHT))
