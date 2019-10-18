@@ -61,7 +61,7 @@ class CameraHandler(Thread):
 
     @abstractmethod
     def get_fps(self):
-        pass
+        return self.camera.framerate
 
     @abstractmethod
     def run(self):
