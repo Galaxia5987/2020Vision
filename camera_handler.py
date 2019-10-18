@@ -16,6 +16,15 @@ class CameraHandler(Thread):
         super().__init__(daemon=True)  # Initialize thread
 
     @abstractmethod
+    def start(self) -> None:
+        """
+        Implementation of Thread.start(). May be overwritten into an empty function if the camera does not use
+        threading, otherwise should just be called as super().
+        :return: None
+        """
+        super()
+
+    @abstractmethod
     def create_camera(self):
         self.camera = None
 
