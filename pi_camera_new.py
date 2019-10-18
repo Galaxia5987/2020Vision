@@ -49,6 +49,14 @@ class PICamera(CameraHandler):
             self.frame = frame.array
             self.rawCapture.truncate(0)
 
+    def set_exposure(self, exposure: int):
+        """
+        Set the camera exposure.
+        :param exposure: Camera exposure value.
+        """
+        self.camera.exposure_compensation = exposure
+        self.log('New exposure: {}'.format(self.get_exposure()))
+
 
 if __name__ == "__main__":
     help(PICamera)
