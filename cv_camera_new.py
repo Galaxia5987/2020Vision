@@ -25,21 +25,6 @@ class CVCamera(CameraHandler):
         self.port = port
         super().__init__(exposure, contrast)
 
-    def start(self) -> None:
-        """
-        Implementation of Thread.start().
-        :return: None
-        """
-        super().start()
-
-    def run(self):
-        """
-        Implementation of Thread.run(). Stores current frame in the class variable. Breaks if exit flag is raised.
-
-        See: run() in CameraHandler in camera_handler.py
-        """
-        super().run()
-
     def create_camera(self):
         """
         Start the camera on the desired port.
