@@ -36,6 +36,10 @@ class CameraHandler(Thread):
         return self.camera.contrast
 
     @abstractmethod
+    def get_resolution(self):
+        return self.camera.resolution
+
+    @abstractmethod
     def get_fps(self):
         pass
 
