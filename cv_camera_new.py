@@ -26,6 +26,10 @@ class CVCamera(CameraHandler):
         super().__init__(exposure, contrast)
 
     def start(self) -> None:
+        """
+        Implementation of Thread.start().
+        :return: None
+        """
         super().start()
 
     def run(self):
