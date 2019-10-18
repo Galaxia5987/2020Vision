@@ -35,8 +35,8 @@ class PICamera(Thread):
         self.camera = PiCamera()
         self.camera.resolution = resolution
         self.camera.framerate = framerate
-        self.camera.exposure_compensation = exposure
-        self.camera.contrast = contrast
+        self.camera.exposure_compensation = exposure  # TODO: Replace with self.set_exposure
+        self.camera.contrast = contrast  # TODO: Make self.set_contrast
         self.rawCapture = PiRGBArray(self.camera, size=resolution)
         self.exit = False
         self.frame = None

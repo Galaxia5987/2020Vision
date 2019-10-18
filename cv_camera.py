@@ -30,7 +30,7 @@ class CVCamera(Thread):
         """
         # Start video capture on desired port
         self.camera = cv2.VideoCapture(port)
-        self.camera.set(constants.CAMERA_CONTRAST, contrast)
+        self.camera.set(constants.CAMERA_CONTRAST, contrast)  # TODO: Make self.set_contrast
         self.set_exposure(exposure)
         self.exit = False
         self.frame = None
