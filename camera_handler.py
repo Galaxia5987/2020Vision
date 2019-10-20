@@ -10,6 +10,7 @@ class CameraHandler(Thread):
     An "upper" class for handling cameras. Includes all methods called from cameras in other classes as abstracts.
     Defaults to the simplest method, sometimes OpenCV and sometimes PICamera. Details on which is which is found in the
     methods themselves.
+    Runs on threads.
 
     Attributes
     ----------
@@ -28,21 +29,23 @@ class CameraHandler(Thread):
         :param exposure: The exposure to set the camera to. Default is 0.
         :param contrast: The contrast to set the camera to. Default is 7.
         """
-        self.camera = None
-        self.create_camera()
-        self.set_exposure(exposure)
-        self.set_contrast(contrast)
-        self.exit = False
-        self.frame = None
-        self.log('Contrast: {} Exposure: {} FPS: {}'.format(self.get_contrast(), self.get_exposure(), self.get_fps()))
-        time.sleep(0.1)  # Sleep to let the camera warm up
-        super().__init__(daemon=True)  # Initialize thread
+        try:
+            self.camera = None
+            self.create_camera()
+            self.set_exposure(exposure)
+            self.set_contrast(contrast)
+            self.exit = False
+            self.frame = None
+            self.log('Contrast: {} Exposure: {} FPS: {}'.format(self.get_contrast(), self.get_exposure(), self.get_fps()))
+            time.sleep(0.1)  # Sleep to let the camera warm up
+            super().__init__(daemon=True)  # Initialize thread
+        except AttributeError:
+            pass
 
     @abstractmethod
     def start(self) -> None:
         """
-        Implementation of Thread.start(). May be overwritten into an empty function if the camera does not use
-        threading, otherwise should not be implemented.
+        Implementation of Thread.start(). Should not be implemented.
         :return: None
         """
         super().start()
@@ -124,7 +127,6 @@ class CameraHandler(Thread):
         OpenCV default.
         Implementation of Thread.run(), stores frames in the class variable by reading from camera. Breaks if exit flag
         is raised.
-        Must be over-written if camera doesn't use threading, or uses a different algorithm.
         """
         while True:
             if self.exit:
