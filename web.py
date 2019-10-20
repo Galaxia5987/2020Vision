@@ -59,7 +59,7 @@ class Web:
             Post route that saves HSV values.
             See: save_hsv_values() in FileHSV in file_hsv.py; save_hsv_values() in Trackbars in trackbars.py
             """
-            self.main.hsv_handler.save_hsv_values()
+            self.main.hsv_handler.save_hsv()
             return '', 204
 
         @self.app.route('/update', methods=['POST'])
