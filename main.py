@@ -37,7 +37,10 @@ def get_args():
     -networktables/-nt : bool
         whether the measurements will be sent to the networktables server
         :name networktables
-        :default
+        :default False
+    -help_main/-hm : bool
+        whether the help() for main will be shown upon launch
+        :default False
     -local : bool
         whether the display frame will be shown on current screen
         :name local
@@ -67,9 +70,14 @@ def get_args():
     parser.add_argument('-no-web', action='store_false', default=True,
                         dest='web',
                         help='Disable web server UI')
+    # Add networktables argument
     parser.add_argument('-networktables', '-nt', action='store_true', default=False,
                         dest='networktables',
                         help='Initiate network tables')
+    # Add help in main argument
+    parser.add_argument('-help-main', '-hm', action='store_true', default=False,
+                        dest='help_main',
+                        help='Display the main\'s documentation')
     # Add local ui argument
     parser.add_argument('-local', action='store_true', default=False,
                         dest='local',
@@ -255,5 +263,7 @@ class Main:
 
 
 if __name__ == '__main__':
-    help(Main)
-    Main().loop()
+    main = Main()
+    if main.results.help_main:
+        help(main)
+    main.loop()
