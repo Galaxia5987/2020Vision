@@ -50,14 +50,14 @@ def get_args():
         :name camera
         :options 'cv', 'pi', 'realsense'
         :default 'cv'
-    -port : int
+    -port/-p : int
         the port in which the camera is inserted
         :name port
         :default 0
     -target : str
         the name of the target being recognised
         :name target
-        :default example_target
+        :default 'example_target'
     -robot : str
         the robot on which the processor is mounted
         :name robot
