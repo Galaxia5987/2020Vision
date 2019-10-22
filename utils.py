@@ -399,14 +399,14 @@ def array8(arr) -> np.array:
     return np.array(arr, dtype=np.uint8)
 
 
-def approx_hull(cnt):
+def approx_hull(cnt, ratio=0.015):
     """
     Lower the amount of points in a contour
     :param cnt:
     :return: A contours with less points
     """
     hull = cv2.convexHull(cnt)
-    epsilon = 0.015 * cv2.arcLength(hull, True)
+    epsilon = ratio * cv2.arcLength(hull, True)
     return cv2.approxPolyDP(hull, epsilon, True)
 
 
@@ -416,7 +416,7 @@ def points(cnt) -> list:
     :param cnt:
     :return: Approximated points
     """
-    hullpoints = list(cv2.convexHull(approx_hull(cnt), returnPoints=True))
+    hullpoints = list(cv2.convexHull(approx_hull(cnt, ratio=0.005), returnPoints=True))
     hullpoints.sort(key=index00)
 
     points = []
@@ -453,6 +453,28 @@ def is_triangle(cnt, ratio=0.07):
     :return:
     """
     return approx_poly(cnt, ratio) == 3
+
+
+def rectangularity(cnt):
+    """
+
+    :param cnt:
+    :return:
+    """
+    convex = cv2.convexHull(cnt)
+    convex_area = cv2.contourArea(convex)
+    con_box = box(cnt)
+    x1 = con_box[0][0]
+    x2 = con_box[1][0]
+    x3 = con_box[2][0]
+    y1 = con_box[0][1]
+    y2 = con_box[1][1]
+    y3 = con_box[2][1]
+    box_area = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2) * (math.sqrt((x2 - x3) ** 2 + (y2 - y3) ** 2))
+    try:
+        return convex_area / box_area
+    except ZeroDivisionError:
+        return 0
 
 
 def numpy_index(element, arrays: list):
