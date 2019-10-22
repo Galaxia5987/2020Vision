@@ -7,34 +7,10 @@ import constants
 
 
 class RealSense:
-    """
-    Handler for Intel RealSense cameras. Uses functions accessed from pyrealsense2.
-    RealSense cameras have a user interface installed when plugging in a camera, and it is the preferred method for
-    debugging most methods found in this class.
-
-    Attributes
-    ----------
-
-    name : str
-        - the name of the camera in use
-        - default: 'RealSense'
-    serial_number : str
-        - the serial number of camera, used in multiple camera setups
-    pipeline : pyrealsense2.pipeline
-        - the pipeline through which frames will be recieved frames from the camera
-    align : pyrealsense2.align
-        - used for resizing the depth frame
-    prof : pyrealsense2.pipeline.start
-        - used for accessing camera settings such as exposure
-
-    """
     def __init__(self, serial_number: str = None, rotated_vertical: bool = False, rotated_horizontal: bool = False,
                  name: str = 'RealSense'):
         """
-        Import the RealSense library and start the pipeline for the camera. Configure various preferences, such as
-        rotation of the camera and frame.
-
-        :param serial_number: Must be filled with the camera's actual serial number, has no default.
+        :param serial_number: Serial number of camera, used in multiple camera setups
         """
         import pyrealsense2 as rs
         config = rs.config()
@@ -62,12 +38,7 @@ class RealSense:
         self.color_frame = None
 
     @property
-    def frame(self) -> iter:
-        """
-        The frame of the camera, treated as a variable, retrieved through an algorithm.
-        Receives both the coloured frame and the depth frame from the pipeline and stores them in class variables.
-        :return: The coloured frame.
-        """
+    def frame(self):
         frames = self.pipeline.wait_for_frames()
         frames = self.align.process(frames)  # Align depth frame to size of depth frame
         depth_frame = frames.get_depth_frame()
@@ -78,27 +49,22 @@ class RealSense:
         return color_image
 
     def start(self):
-        """
-        Dry implementation of Thread run method, to match those in other cameras.
-        """
+        """Implementation of Thread run method, stores frames in a class variable."""
         pass
 
     def release(self):
-        """
-        Release the camera and stop the loop.
-        """
+        """Release the camera and loop."""
         self.exit = True
         self.pipeline.stop()
 
-    @staticmethod
-    def get_resolution() -> (int, int):
+    def get_resolution(self):
         return 424, 240
 
     def set_exposure(self, exposure: int):
         """
-        Set the exposure to a desired value. May not set the camera to the exact value, so the actual exposure of the
-        camera is logged.
-        :param exposure: Exposure to se the camera to.
+        Set the exposure to a desired value.
+        :param exposure:
+
         """
         s = self.prof.get_device().query_sensors()[1]
         s.set_option(self.rs_options.enable_auto_exposure, 0)
@@ -106,13 +72,7 @@ class RealSense:
         s.set_option(self.rs_options.exposure, exposure)
         logging.info('Current exposure: {}'.format(s.get_option(self.rs_options.exposure)))
 
-    def get_distance(self, x: int, y: int):
-        """
-        Matches a coloured pixel to its distance recorded in the depth frame.
-        :param x: X coordinate of the pixel.
-        :param y: Y coordinate of the pixel.
-        :return: The real life distance of the object the pixel.
-        """
+    def get_distance(self, x, y):
         if self.rotated_horizontal:
             return self.depth_frame.get_distance(self.get_resolution()[0] - x, self.get_resolution()[1] - y)
         elif self.rotated_vertical:
@@ -123,7 +83,3 @@ class RealSense:
                 # (y, 480 - x)
                 return self.depth_frame.get_distance(y, self.get_resolution()[1] - x)
         return self.depth_frame.get_distance(x, y)
-
-
-if __name__ == "__main__":
-    help(RealSense)
