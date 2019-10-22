@@ -1,13 +1,19 @@
 import utils
 import cv2
-import math
 import numpy as np
 from targets.target_base import TargetBase
+import constants
+import math
+
 class Target(TargetBase):
+    def __init__(self, main):
+        super().__init__(main)
+        self.exposure = -5
+
     @staticmethod
-    def create_mask(frame, hsv):
+    def mask(frame, hsv):
         #start mask
-        mask = utils.hsv_mask(frame, hsv)
+        mask = utils.hsv_mask(frame,hsv)
         mask = cv2.threshold(mask, 127, 225, 0)[1]
         mask = cv2.erode(mask, kernel=np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.uint8), iterations=1)
         mask = cv2.dilate(mask, kernel=np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], dtype=np.uint8), iterations=1)
@@ -17,27 +23,21 @@ class Target(TargetBase):
     @staticmethod
     def filter_contours(contours, hierarchy):
         correct_contours = []
-        all_children = []
-        if contours:
-            for con in contours:
-                convex = cv2.convexHull(con)
-                convex_area = cv2.contourArea(convex)
-                box = utils.box(con)
-                x1 = box[0][0]
-                x2 = box[1][0]
-                x3 = box[2][0]
-                y1 = box[0][1]
-                y2 = box[1][1]
-                y3 = box[2][1]
-                box_area = math.sqrt((x1-x2)**2+(y1-y2)**2)*(math.sqrt((x2-x3)**2+(y2-y3)**2))
-                if (0.9 < box_area/convex_area < 1.15 and 12 > len(utils.points(con)) > 6):
-                    correct_contours.extend(con)
-                return correct_contours
+        for con in contours:
+            if 8 > len(utils.points(con)) > 4 and 0.9 < utils.rectangularity(con) < 1.15 and cv2.contourArea(con) > 100:
+                correct_contours.append(con)
+        return correct_contours
 
     @staticmethod
     def draw_contours(filtered_contours, original):
         if filtered_contours:
-            for cnt in filtered_contours:
-                (a, b), radius = cv2.minEnclosingCircle(cnt)
-                center = int(a), int(b)
-                cv2.circle(original, center, int(radius), (0, 255, 0), 5)
+            cv2.drawContours(original,filtered_contours, -1, (200,70,100), 3)
+
+    @staticmethod
+    def measurements(frame, cnt):
+        xframe =frame.shape[1]/2
+        xtarget = cv2.minEnclosingCircle(cnt)[0][0]
+        xtarget *= -1
+        x = xtarget - xframe
+        f = constants.FOCAL_LENGTHS['cv']
+
