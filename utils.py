@@ -182,7 +182,7 @@ def hsv_mask(frame: np.array, hsv: np.array) -> np.array:
     Generate HSV mask.
     :param frame: Original frame, BGR format.
     :param hsv: Dictionary of HSV values, formatted as in file_hsv.FileHSV.
-    :return: Mask in HSV range.
+    :return: Binary mask in HSV range, where pixels within range hold 1's, and those outside hold 0's.
     """
     hsv_colors = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_hsv = np.array([hsv['H'][0], hsv['S'][0], hsv['V'][0]])
@@ -447,45 +447,46 @@ def is_circle(cnt: np.array, minimum: Union[float, int]) -> bool:
     return minimum <= ratio <= 1
 
 
-def approx_poly(cnt: np.array, ratio: float = 0.07):
+def approx_poly(cnt: np.array, ratio: float = 0.07) -> int:
     """
     Another polygon approximation for contours. Does not use convex hulls, unlike approx_hull.
-    :param cnt:
-    :param ratio:
-    :return:
+    :param cnt: A contour.
+    :param ratio: A magic number that determines the magnitude of approximation. Default is 0.07.
+    :return: The amount of points in the approximated polygon.
     """
     peri = cv2.arcLength(cnt, True)
     approx = cv2.approxPolyDP(cnt, ratio * peri, True)
     return len(approx)
 
 
-def is_triangle(cnt, ratio=0.07):
+def is_triangle(cnt, ratio=0.07) -> bool:
     """
-    Returns if contour is approximately a triangle.
-    :param ratio: Approx ratio
-    :param cnt:
-    :return:
+    Returns if contour resembles a triangle.
+    :param cnt: A contour.
+    :param ratio: Approximation magnitude. Default is 0.07.
+    :return: Whether the approximated polygon has 3 points.
     """
     return approx_poly(cnt, ratio) == 3
 
 
 def numpy_index(element, arrays: list):
     """
-    Gets index of numpy array in a list.
-    :param element:
-    :param arrays:
-    :return:
+    TODO: what
+    :param element: An element.
+    :param arrays: The array in which to search for the element.
+    :return: Index of the element - a numpy array - in a list.
     """
     return [np.array_equal(element, x) for x in arrays].index(True)
 
 
-def angle(focal, xtarget, frame):
+def angle(focal: float, xtarget: int, frame: np.array) -> Union[float, int]:
     """
-    Calculates angle, works for most targets.
-    :param focal: Focal length of desired camera
-    :param xtarget: a of min enclosing circle
-    :param frame: video frame
-    :return: angle in degrees
+    Uses: Find angle from target relative to camera axis.
+
+    :param focal: Focal length of desired camera.
+    :param xtarget: X coordinate of target's center pixel - usually center of minimum enclosing circle.
+    :param frame: The frame in which the target was recognised.
+    :return: Angle in degrees.
     """
     xframe = frame.shape[1] / 2
     return math.atan2((xtarget - xframe), focal) * (180 / math.pi)
@@ -493,19 +494,19 @@ def angle(focal, xtarget, frame):
 
 def np_array_in_list(np_array: np.array, list_arrays: List[np.array]) -> bool:
     """
-    Return whether a NumPy array is in a list of NumPy arrays.
-    :param np_array: array to check
-    :param list_arrays: list of arrays to check
-    :return: whether a NumPy array is in a list of NumPy arrays
+    :param np_array: A numpy array.
+    :param list_arrays: List of NumPy arrays.
+    :return: Whether a NumPy array is in a list of NumPy arrays.
     """
     return next((True for elem in list_arrays if np.array_equal(elem, np_array)), False)
 
 
-def get_center(cnt):
+def get_center(cnt: np.array) -> (float, float):
     """
-    Return the center of the contour.
-    :param cnt: input contour
-    :return:
+    See: cv2.moments()
+
+    :param cnt: A contour.
+    :return: X and Y coordinate of the center pixel.
     """
     # Get center of the contour
     moment = cv2.moments(cnt)
@@ -517,12 +518,12 @@ def get_center(cnt):
         return None, None
 
 
-def load_tf_graph(name, tf):
+def load_tf_graph(name: str, tf: __import__):
     """
     Load TensorFlow graph.
-    :param name: name of graph
-    :param tf: TensorFlow module
-    :return: TensorFlow graph
+    :param name: Name of the graph.
+    :param tf: TensorFlow module, imported outside of this function call.
+    :return: TensorFlow graph.
     """
     detection_graph = tf.Graph()
     with detection_graph.as_default():
@@ -534,19 +535,23 @@ def load_tf_graph(name, tf):
     return detection_graph
 
 
-def put_number(number, x: int, y: int, image):
+def put_number(number: Union[float, int], x: int, y: int, image: np.array):
     """
-    Put number on image.
-    :param text: Number to display
-    :param x: x location
-    :param y: y locatiomn
-    :return:
+    :param number: Number to display.
+    :param x: X coordinate to put number.
+    :param y: Y coordinate to put number.
+    :param image: Image to put number on.
     """
     if number is not None:
         cv2.putText(image, str(int(number)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 1, cv2.LINE_AA)
 
 
-def bounding_box_coords(bounding_box, frame):
+def bounding_box_coords(bounding_box: iter, frame: np.array) -> (int, int, int, int):
+    """
+    :param bounding_box: A straight bounding box.
+    :param frame: Frame in which the bounding box was found.
+    :return: Left X coordinate, right X coordinate, top Y coordinate, bottom Y coordinate.
+    """
     cols = frame.shape[1]
     rows = frame.shape[0]
     x1 = bounding_box[1] * cols
