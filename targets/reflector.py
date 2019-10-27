@@ -24,7 +24,7 @@ class Target(TargetBase):
     def filter_contours(contours, hierarchy):
         correct_contours = []
         for con in contours:
-            if 8 > len(utils.points(con)) > 4 and 0.9 < utils.rectangularity(con) < 1.15 and cv2.contourArea(con) > 100:
+            if 8 > len(utils.points(con)) > 4 and 0.9 < utils.rectangularity(con,"check") < 1.15 and cv2.contourArea(con) > 100:
                 correct_contours.append(con)
         return correct_contours
 
@@ -35,9 +35,26 @@ class Target(TargetBase):
 
     @staticmethod
     def measurements(frame, cnt):
-        xframe =frame.shape[1]/2
-        xtarget = cv2.minEnclosingCircle(cnt)[0][0]
-        xtarget *= -1
-        x = xtarget - xframe
-        f = constants.FOCAL_LENGTHS['cv']
+        if cnt:
+            cnt = cnt[0]
+            xframe =frame.shape[1]/2
+            yframe = frame.shape[0]
+            xtarget, ytarget = utils.center(cnt)
+
+            x = xtarget - xframe
+            f = constants.FOCAL_LENGTHS['cv']
+            width_target = constants.TARGET_SIZES['reflector']['width']
+            x1, x2, x3, y1, y2, y3 = utils.rectangularity(cnt, "return")
+            xp = max(math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2), (math.sqrt((x2 - x3) ** 2 + (y2 - y3) ** 2)))
+            try:
+                distance = (f * width_target) / xp
+            except ZeroDivisionError:
+                distance = None
+            angle = math.atan2(x,f)
+
+            cv2.putText(frame,str(angle*(180/math.pi)),(xtarget,ytarget),cv2.FONT_HERSHEY_SIMPLEX ,1,(255, 0, 0),3)
+            cv2.putText(frame, str(distance), (xtarget, ytarget-100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
+            cv2.line(frame, (int(xframe), 0), (int(xframe), int(yframe)), (0, 255, 0), 2)
+            return angle*(180/math.pi), distance, None, None
+        return None, None, None, None
 
