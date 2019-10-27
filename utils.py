@@ -455,7 +455,7 @@ def is_triangle(cnt, ratio=0.07):
     return approx_poly(cnt, ratio) == 3
 
 
-def rectangularity(cnt):
+def rectangularity(cnt,operation):
     """
 
     :param cnt:
@@ -471,10 +471,15 @@ def rectangularity(cnt):
     y2 = con_box[1][1]
     y3 = con_box[2][1]
     box_area = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2) * (math.sqrt((x2 - x3) ** 2 + (y2 - y3) ** 2))
-    try:
-        return convex_area / box_area
-    except ZeroDivisionError:
-        return 0
+    # return the points of the box
+    if operation == "return":
+        return x1, x2, x3, y1, y2, y3
+    # check if the contour is a square
+    if operation == "check":
+        try:
+            return convex_area / box_area
+        except ZeroDivisionError:
+            return 0
 
 
 def numpy_index(element, arrays: list):
