@@ -220,6 +220,9 @@ class Main:
             # Copy the initial frame for analysis and display, respectively
             original = frame.copy()
             contour_image = frame.copy()
+            # Show FPS
+            avg = utils.calculate_fps(contour_image, time.time(), timer, avg)
+            timer = time.time()
             # Create a mask
             mask = target.create_mask(frame, self.hsv_handler.get_hsv())
             # Get all contours
@@ -230,9 +233,7 @@ class Main:
             target.draw_contours(filtered_contours, contour_image)
             # Find distance, angle, and other measurements if stated
             angle, distance, field_angle, additional_data = target.measurements(contour_image, filtered_contours)
-            # Show FPS
-            avg = utils.calculate_fps(contour_image, time.time(), timer, avg)
-            timer = time.time()
+            if self.results.web:
             # Stream frame
             self.web.frame = contour_image
             # Display frame
