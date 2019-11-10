@@ -218,18 +218,18 @@ class Main:
             else:
                 printed = False
             # Copy the initial frame for analysis and display, respectively
-            #original = frame.copy()
+            original = frame.copy()
             contour_image = frame.copy()
             # Create a mask
-            #mask = target.create_mask(frame, self.hsv_handler.get_hsv())
+            mask = target.create_mask(frame, self.hsv_handler.get_hsv())
             # Get all contours
-            #contours, hierarchy = target.find_contours(mask)
+            contours, hierarchy = target.find_contours(mask)
             # Filter contours
-            #filtered_contours = target.filter_contours(contours, hierarchy)
+            filtered_contours = target.filter_contours(contours, hierarchy)
             # Draw contours
-            #target.draw_contours(filtered_contours, contour_image)
+            target.draw_contours(filtered_contours, contour_image)
             # Find distance, angle, and other measurements if stated
-            #angle, distance, field_angle, additional_data = target.measurements(contour_image, filtered_contours)
+            angle, distance, field_angle, additional_data = target.measurements(contour_image, filtered_contours)
             # Show FPS
             avg = utils.calculate_fps(contour_image, time.time(), timer, avg)
             timer = time.time()
@@ -238,15 +238,15 @@ class Main:
             # Display frame
             self.display.process_frame(contour_image, 'image', self.results.local)
             # Display mask
-            #self.display.process_frame(utils.bitwise_and(original, mask), 'mask', self.results.local)
+            self.display.process_frame(utils.bitwise_and(original, mask), 'mask', self.results.local)
             # Send measurements to networktables, if requested, and if measurements were returned
-            #if self.results.networktables:
-            #    if distance is not None:
-            #        self.nt.set_item('distance', distance)
-            #    if angle is not None:
-            #         self.nt.set_item('angle', angle)
-            #     if field_angle is not None:
-            #         self.nt.set_item('field_angle', field_angle)
+            if self.results.networktables:
+                if distance is not None:
+                    self.nt.set_item('distance', distance)
+                if angle is not None:
+                    self.nt.set_item('angle', angle)
+                if field_angle is not None:
+                    self.nt.set_item('field_angle', field_angle)
             # TODO: Send additional data
             if self.stop:
                 # If stop signal was sent, call loop again to start with new name
