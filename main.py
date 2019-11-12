@@ -209,6 +209,7 @@ class Main:
         # Timer for FPS counter
         self.timer = time.time()
         avg = 0
+        last_frame = self.display.get_frame()
         while True:
             # Get initial frame
             frame = self.display.get_frame()
@@ -224,6 +225,9 @@ class Main:
             # Copy the initial frame for analysis and display, respectively
             original = frame.copy()
             contour_image = frame.copy()
+            same_frame = original == last_frame
+            if same_frame == False:
+                last_frame = original
             # Show FPS
             avg = utils.calculate_fps(contour_image, time.time(), self.timer, avg)
             self.timer = time.time()
