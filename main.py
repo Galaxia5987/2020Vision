@@ -233,8 +233,9 @@ class Main:
             # Show FPS
             avg = utils.calculate_fps(contour_image, time.time(), timer, avg)
             timer = time.time()
-            # Stream frame
-            self.web.frame = contour_image
+            if self.results.web:
+                # Stream frame
+                self.web.frame = contour_image
             # Display frame
             self.display.process_frame(contour_image, 'image', self.results.local)
             # Display mask
