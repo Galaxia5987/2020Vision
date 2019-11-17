@@ -209,7 +209,6 @@ class Main:
         # Timer for FPS counter
         self.timer = time.time()
         avg = 0
-        last_frame = self.display.get_frame()
         while True:
             # Get initial frame
             frame = self.display.get_frame()
@@ -225,9 +224,6 @@ class Main:
             # Copy the initial frame for analysis and display, respectively
             original = frame.copy()
             contour_image = frame.copy()
-            same_frame = original == last_frame
-            if same_frame == False:
-                last_frame = original
             # Show FPS
             avg = utils.calculate_fps(contour_image, time.time(), self.timer, avg)
             self.timer = time.time()
@@ -244,9 +240,6 @@ class Main:
             self.logger.record_contours()
             # Find distance, angle, and other measurements if stated
             angle, distance, field_angle, additional_data = target.measurements(contour_image, filtered_contours)
-            # Show FPS
-            avg = utils.calculate_fps(contour_image, time.time(), timer, avg)
-            timer = time.time()
             if self.results.web:
                 # Stream frame
                 self.web.frame = contour_image
