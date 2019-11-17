@@ -244,6 +244,9 @@ class Main:
             self.logger.record_contours()
             # Find distance, angle, and other measurements if stated
             angle, distance, field_angle, additional_data = target.measurements(contour_image, filtered_contours)
+            # Show FPS
+            avg = utils.calculate_fps(contour_image, time.time(), timer, avg)
+            timer = time.time()
             if self.results.web:
                 # Stream frame
                 self.web.frame = contour_image

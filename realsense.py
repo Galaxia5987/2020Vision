@@ -44,8 +44,8 @@ class RealSense:
 
         self.serial_number = serial_number
 
-        config.enable_stream(rs.stream.depth, 480, 270, rs.format.z16, 60)
-        config.enable_stream(rs.stream.color, 424, 240, rs.format.bgr8, 60)
+        config.enable_stream(rs.stream.depth, 424, 240, rs.format.z16, 60)
+        config.enable_stream(rs.stream.color, 320, 180, rs.format.bgr8, 60)
         self.pipeline = rs.pipeline()
         self.align = rs.align(rs.stream.color)
 
