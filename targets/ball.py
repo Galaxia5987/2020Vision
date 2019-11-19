@@ -43,6 +43,8 @@ class Target(TargetBase):
             if self.main.results.camera == 'realsense':
                 distance = self.main.display.camera_provider.get_distance(int(x), int(y))
                 cv2.putText(frame, str(distance), (int(x), int(y-1000)), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 255), 1,cv2.LINE_AA)
+            else:
+                distance = None
 
 
 
