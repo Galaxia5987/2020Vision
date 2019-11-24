@@ -7,6 +7,9 @@ from targets.target_base import TargetBase
 
 class Target(TargetBase):
     """The cargo in the 2019."""
+    def __init__(self, main):
+        super().__init__(main)
+        self.exposure = 25
 
     def create_mask(self, frame, hsv):
         mask = utils.hsv_mask(frame, hsv)

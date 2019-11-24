@@ -327,7 +327,7 @@ def calculate_fps(frame: np.array, current_time: float, last_time: float, avg: f
     :return: Average FPS.
     """
     avg = (avg + (current_time - last_time)) / 2
-    # cv2.putText(frame, '{} FPS'.format(int(1 / avg)), (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_AA)
+    cv2.putText(frame, '{} FPS'.format(int(1 / avg)), (0, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
     return avg
 
 
