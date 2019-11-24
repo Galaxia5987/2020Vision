@@ -74,4 +74,10 @@ class Target(TargetBase):
             if distance:
                 cv2.putText(frame, str(int(distance * 100)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
                             cv2.LINE_AA)
-        return distance, angle, None, None
+        elif contours:
+            for cnt in contours:
+                f = constants.FOCAL_LENGTHS['cv']
+                distances.append(utils.distance(f, constants.GAME_PIECE_SIZES['power_cube']['width'],
+                                                float(utils.width(cnt)[0])))
+            distance = distances[0]
+        return angle, distance, None, None
