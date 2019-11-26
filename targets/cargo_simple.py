@@ -76,8 +76,10 @@ class Target(TargetBase):
                             cv2.LINE_AA)
         elif contours:
             for cnt in contours:
+                (x, y) = utils.center(cnt)
                 f = constants.FOCAL_LENGTHS['cv']
                 distances.append(utils.distance(f, constants.GAME_PIECE_SIZES['power_cube']['width'],
                                                 float(utils.width(cnt)[0])))
+                angle = utils.angle(f,x,frame)
             distance = distances[0]
         return angle, distance, None, None
