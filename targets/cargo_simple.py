@@ -63,6 +63,8 @@ class Target(TargetBase):
         distances = []
         distance = None
         angle = None
+        x = None
+        y = None
         if contours and self.main.results.camera == 'realsense':
             for cnt in contours:
                 (x, y) = utils.center(cnt)
@@ -71,15 +73,15 @@ class Target(TargetBase):
             closest = contours[distances.index(distance)]
             (x, y) = utils.center(closest)
             angle = utils.angle(constants.FOCAL_LENGTHS['realsense'], x, frame)
-            if distance:
-                cv2.putText(frame, str(int(distance * 100)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
-                            cv2.LINE_AA)
         elif contours:
             for cnt in contours:
                 (x, y) = utils.center(cnt)
                 f = constants.FOCAL_LENGTHS['cv']
-                distances.append(utils.distance(f, constants.GAME_PIECE_SIZES['power_cube']['width'],
-                                                float(utils.width(cnt)[0])))
-                angle = utils.angle(f,x,frame)
+                distances.append(utils.distance(f, constants.GAME_PIECE_SIZES['cargo']['diameter'],
+                                                utils.width(cnt)[0]))
+                angle = utils.angle(f, x, frame)
             distance = distances[0]
+        if distance:
+            cv2.putText(frame, str(int(distance * 100)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
+                        cv2.LINE_AA)
         return angle, distance, None, None
