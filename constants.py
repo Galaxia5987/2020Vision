@@ -25,7 +25,7 @@ GAME_PIECE_SIZES = {'fuel': {'diameter': 0.127},
                     'gear': {'diameter': 0.3},
                     'power_cube': {'width': 0.3302, 'length': 0.3302, 'height': 0.2794},
                     'tennis_ball': {'diameter': 0.134},
-                    'cargo':{'diameter':0.3302}}
+                    'cargo': {'diameter': 0.3302}}
 
 CAMERA_CONTRAST = 11
 CAMERA_EXPOSURE = 15
