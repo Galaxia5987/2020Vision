@@ -50,7 +50,7 @@ class Target(TargetBase):
         if pair is None: return None, None, None
         x, y, w, h = cv2.boundingRect(pair[0])
         x2, y2, w2, h2 = cv2.boundingRect(pair[1])
-        bounding_box_center = (x + (x2 + w2)) / 2
+        bounding_box_center = math.sqrt(x ** 2 + (x2 + w2) ** 2) / 2
         angle = utils.angle(constants.FOCAL_LENGTHS[self.main.results.camera], bounding_box_center, original)
 
         horizontal_distance = None
@@ -158,7 +158,7 @@ class Target(TargetBase):
             """
             return (cv2.boundingRect(pair[0])[0] + cv2.boundingRect(pair[1])[0]) / 2
 
-        return min(pairs, key=lambda p: abs((self.main.camera_provider.get_resolution()[0] / 2) - get_mid_x(p)))
+        return min(pairs, key=lambda p: abs((self.main.display.camera_provider.get_resolution()[0] / 2) - get_mid_x(p)))
 
     @staticmethod
     def is_right_curvature(cnt):
@@ -205,7 +205,7 @@ class Target(TargetBase):
             b2 = r1_point2[1] - a2 * r2_point1[0]
             x_meeting = abs((b1 - b2) / (a1 - a2))
             y_meeting = a1 * x_meeting + b1
-            # y_meeting = self.main.camera_provider.get_resolution()[1] - y_meeting
+            # y_meeting = self.main.display.camera_provider.get_resolution()[1] - y_meeting
             if y_meeting < r2_point2[1] and r1_point2[0] < x_meeting < r2_point2[0]:
                 already_paired.extend([cnt, last_cnt])
                 pairs.append((cnt, last_cnt))
