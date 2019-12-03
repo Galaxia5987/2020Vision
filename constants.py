@@ -1,7 +1,8 @@
 # Focal length dictionary
 FOCAL_LENGTHS = {
     'cv': 638.6086956521739,
-    'realsense': 606.3
+    'realsense': 606.3,
+    'pi': 608.4
 }
 
 # Target sizes dictionary
