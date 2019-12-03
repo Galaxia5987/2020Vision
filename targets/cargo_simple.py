@@ -76,20 +76,16 @@ class Target(TargetBase):
         elif contours:
             for cnt in contours:
                 (x, y) = utils.center(cnt)
-                f = constants.FOCAL_LENGTHS['cv']
+                f = constants.FOCAL_LENGTHS[self.main.results.camera]
 
                 radius = cv2.minEnclosingCircle(cnt)[1]
                 distances.append(utils.distance(f, constants.GAME_PIECE_SIZES['cargo']['diameter'],
                                                 2*radius))
                 angle = utils.angle(f, x, frame)
-
-                d = 1
-                f = utils.find_focal(d, constants.GAME_PIECE_SIZES['cargo']['diameter'], radius *2)
             distance = distances[0]
         if distance:
-            cv2.putText(frame, str(f), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
+            cv2.putText(frame, str(distance * 100), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
                         cv2.LINE_AA)
-        
 
         return angle, distance, None, None
 
