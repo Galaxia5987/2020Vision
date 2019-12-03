@@ -1,5 +1,4 @@
 import cv2
-
 import utils
 import constants
 from targets.target_base import TargetBase
@@ -90,6 +89,7 @@ class Target(TargetBase):
         if distance:
             cv2.putText(frame, str(f), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
                         cv2.LINE_AA)
+        
 
         return angle, distance, None, None
 
