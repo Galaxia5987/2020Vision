@@ -46,18 +46,29 @@ class Target(TargetBase):
                     rectArea_on_cntArea = abs(rectArea/cv2.contourArea(cnt))
                 except ZeroDivisionError:
                     rectArea_on_cntArea = -2
-                if 0.9>rectArea_on_cntArea>0.6:
-                    all_children.extend(utils.get_children(cnt, contours, hierarchy))
-                    correct_contours.append(cnt)
+                if 1.5>rectArea_on_cntArea>0.6:
+                    if rectArea > 1000:
+                        all_children.extend(utils.get_children(cnt, contours, hierarchy))
+                        correct_contours.append(cnt)
 
-            for cnt in all_children:
-                try:
-                    correct_contours.remove(cnt)
-                except ValueError:
-                    continue
+                for cnt in all_children:
+                    try:
+                        correct_contours.remove(cnt)
+                    except ValueError:
+                        continue
         return correct_contours
 
+
     @staticmethod
+    def draw_contours(filtered_contours, original):
+        if filtered_contours:
+            for cnt in filtered_contours:
+                rect = cv2.minAreaRect(cnt)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
+                cv2.drawContours(original, [box], 0, (0, 0, 255), 2)
+
+
     def measurements(self, frame, contours):
         distances = []
         distance = None
@@ -75,15 +86,6 @@ class Target(TargetBase):
                             cv2.LINE_AA)
 
         return distance, angle, None, None
-
-    @staticmethod
-    def draw_contours(filtered_contours, original):
-        if filtered_contours:
-            for cnt in filtered_contours:
-                rect = cv2.minAreaRect(cnt)
-                box = cv2.boxPoints(rect)
-                box = np.int0(box)
-                cv2.drawContours(original, [box], 0, (0, 0, 255), 2)
 
 
 
