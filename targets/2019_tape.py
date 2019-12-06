@@ -99,6 +99,16 @@ class Target(TargetBase):
                         pass
                 else:
                     horizontal_distance = rs_distance
+        else:
+            real_height = constants.TARGET_SIZES['2019']['alternate_height']
+            pixel_height_1 = h
+            pixel_height_2 = h2
+            focal = constants.FOCAL_LENGTHS[self.main.results.camera]
+
+            distance_1 = utils.distance(focal, real_height, pixel_height_1)
+            distance_2 = utils.distance(focal, real_height, pixel_height_2)
+
+            horizontal_distance = (distance_1 + distance_2) / 2
 
         return angle, horizontal_distance, field_angle
 
