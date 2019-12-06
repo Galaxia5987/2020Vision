@@ -231,6 +231,7 @@ class Main:
             mask = target.create_mask(frame, self.hsv_handler.get_hsv())
             # Get all contours
             contours, hierarchy = target.find_contours(mask)
+            contours = contours[0:10]
             self.is_potential_target = bool(contours)
             # Filter contours
             filtered_contours = target.filter_contours(contours, hierarchy)
