@@ -11,7 +11,7 @@ TARGET_SIZES = {'2012': {'width': 0.609, 'height': 0.457, 'closing_circle_radius
                 '2016': {'width': 0.508, 'height': 0.304},
                 '2018': {'width': 0.508, 'height': 0.203},
                 '2019': {'single_width': 0.0508, 'single_height': 0.1397, 'inner_distance_between_tapes': 0.2032,
-                         'outer_distance_between_tapes': 0.3015}}
+                         'outer_distance_between_tapes': 0.3015, 'alternate_height': 0.16}}
 
 # The distance between the middle of the target and the carpet
 HEIGHT_FROM_CARPET = {'2019': {'reflectors': {'hatch': 0.73, 'cargo': 0.9255}},
