@@ -10,29 +10,15 @@ class Target(TargetBase):
 
     def __init__(self, main):
         super().__init__(main)
-        self.exposure = -5.435
+        self.exposure = -8
 
     def create_mask(self, frame, hsv):
         mask = utils.hsv_mask(frame, hsv)
         mask = utils.binary_thresh(mask, 127)
-
-        edge = self.edge_detection(frame, mask)
-
-        mask = utils.bitwise_not(mask, edge)
         mask = utils.erode(mask, self.kernel_big)
         mask = utils.closing_morphology(mask, kernel_d=self.kernel_small, kernel_e=self.kernel_small, itr=3)
 
         return mask
-
-    def edge_detection(self, frame, mask):
-        edge = utils.canny_edge_detection(frame)
-        edge = utils.binary_thresh(edge, 127)
-        edge = utils.array8(edge)
-        edge = utils.dilate(edge, self.kernel_big)
-        edge = utils.opening_morphology(edge, kernel_e=self.kernel_small, kernel_d=self.kernel_small, itr=3)
-        edge = utils.bitwise_and(edge, mask)
-
-        return edge
 
     @staticmethod
     def filter_contours(contours, hierarchy):
@@ -84,6 +70,20 @@ class Target(TargetBase):
             if distance:
                 cv2.putText(frame, str(int(distance * 100)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
                             cv2.LINE_AA)
+
+        elif contours:
+            for cnt in contours:
+                (x, y) = utils.center(cnt)
+                f = constants.FOCAL_LENGTHS[self.main.results.camera]
+
+                width, height = cv2.boundingRect(cnt)[2:4]
+                distances.append(utils.distance(f, constants.GAME_PIECE_SIZES['square']['segment'],
+                                              width))
+                angle = utils.angle(f, x, frame)
+            distance = distances[0]
+        if distance:
+            cv2.putText(frame, str(int(distance*100))+" cm", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (225, 0, 0), 1,
+                        cv2.LINE_AA)
 
         return distance, angle, None, None
 
