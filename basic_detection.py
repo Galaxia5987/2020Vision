@@ -1,6 +1,9 @@
 import cv2
 import numpy as np
 
+target_real = 0.0989
+f = 638.6086956521739
+
 port = input('Camera port: ')
 
 try:
@@ -49,6 +52,13 @@ def get_hsv():
     return {'low': low, 'high': high}
 
 
+def rectangularity(cnt):
+    _, _, w, h = cv2.boundingRect(cnt)
+    area = cv2.contourArea(cnt)
+
+    return area / (w * h)
+
+
 while True:
     try:
         frame = camera.read()[1]
@@ -70,8 +80,24 @@ while True:
     else:
         contours = contours[1]
 
+    filtered_contours = []
+
     if contours:
-        cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
+        for cnt in contours:
+            if 0.8 <= rectangularity(cnt) <= 1:
+                filtered_contours.append(cnt)
+        cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
+
+    if filtered_contours:
+        contours.sort(key=cv2.contourArea)
+        target = contours[0]
+        (x, y), _ = cv2.minEnclosingCircle(target)
+        target_pixels = cv2.boundingRect(target)[3]
+
+        distance = (f * target_real) / target_pixels
+        cv2.drawContours(frame, filtered_contours, -1, (0, 255, 0), 3)
+        cv2.putText(frame, str(distance * 100), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 1,
+                    cv2.LINE_AA)
 
     cv2.imshow('frame', frame)
     cv2.imshow('mask', mask_bitwise)
