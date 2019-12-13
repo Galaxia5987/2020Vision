@@ -1,10 +1,46 @@
 import cv2
 import numpy as np
+from networktables import NetworkTables
 
 target_real = 0.0989
 f = 638.6086956521739
 
 port = input('Camera port: ')
+
+
+def connection_listener(connected, info):
+    if connected:
+        print('Successfully connected.\n{}'.format(info))
+    else:
+        print('Failed to connect.\n{}'.format(info))
+
+
+server = '10.59.87.2'
+NetworkTables.setUpdateRate(0.01)
+NetworkTables.initialize(server=server)
+NetworkTables.addConnectionListener(connection_listener, immediateNotify=True)
+table = NetworkTables.getTable('Vision')
+
+
+def set_item(key, value):
+    """
+    Add a value to SmartDashboard.
+
+    :param key: The name the value will be stored under and displayed.
+    :param value: The information the key will hold.
+    """
+    table.putValue(key, value)
+
+
+def get_item(key, default_value):
+    """
+    Get a value from SmartDashboard.
+
+    :param key: The name the value is stored under.
+    :param default_value: The value returned if key holds none.
+    :return: The value that the key holds, default_value if it holds none.
+    """
+    return table.getValue(key, default_value)
 
 try:
     camera = cv2.VideoCapture(int(port))
@@ -98,6 +134,8 @@ while True:
         cv2.drawContours(frame, filtered_contours, -1, (0, 255, 0), 3)
         cv2.putText(frame, str(distance * 100), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 1,
                     cv2.LINE_AA)
+        if distance:
+            set_item('Distance', distance)
 
     cv2.imshow('frame', frame)
     cv2.imshow('mask', mask_bitwise)
