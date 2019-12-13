@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from networktables import NetworkTables
 
-target_real = 0.0989
+target_real = 0.046
 f = 638.6086956521739
 
 port = input('Camera port: ')
