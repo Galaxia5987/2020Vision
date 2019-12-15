@@ -387,6 +387,7 @@ def distance(focal: float, object_width: float, object_width_pixels: float) -> f
     :param object_width_pixels: Object width in pixels.
     :return: Distance from object in meters.
     """
+    # TODO: Change parameters to 'real measurement' and 'pixel measurement'
     return (focal * object_width) / object_width_pixels
 
 
@@ -399,6 +400,17 @@ def pixel_width(focal: float, object_width: float, distance: float) -> float:
     :return: Object width in pixels.
     """
     return focal * object_width / distance
+
+
+def find_focal(distance: float, object_width:float, object_width_pixels:float):
+    """
+        Calculate focal length according to known distance. 2 distance units over 1 distance unit gives 1 distance unit.
+        :param object_width_pixels: Object width in pixels.
+        :param object_width: Real object width in meters.
+        :param distance: Known distance from target in meters.
+        :return: focal length
+        """
+    return (distance * object_width_pixels) / object_width
 
 
 def array8(arr: iter) -> np.array:
