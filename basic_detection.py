@@ -1,12 +1,11 @@
 import cv2
 import numpy as np
 from networktables import NetworkTables
+from picamera import PiCamera
+from picamera.array import PiRGBArray
 
 target_real = 0.046
 f = 638.6086956521739
-
-port = input('Camera port: ')
-
 
 def connection_listener(connected, info):
     if connected:
@@ -21,6 +20,12 @@ NetworkTables.initialize(server=server)
 NetworkTables.addConnectionListener(connection_listener, immediateNotify=True)
 table = NetworkTables.getTable('Vision')
 
+camera = PiCamera()
+res = (320, 240)
+camera.resolution = res
+camera.exposure_mode = 'off'
+camera.exposure_compensation = -25
+rawCapture = PiRGBArray(camera, size=res)
 
 def set_item(key, value):
     """
@@ -42,32 +47,24 @@ def get_item(key, default_value):
     """
     return table.getValue(key, default_value)
 
-try:
-    camera = cv2.VideoCapture(int(port))
-except:
-    camera = cv2.VideoCapture(0)
-
-exposure = input('Exposure: ')
-
-try:
-    camera.set(15, int(exposure))
-except:
-    camera.set(15, 0)
 
 window = cv2.namedWindow('HSV')
 callback = lambda x: None
 
 cv2.createTrackbar('lowH', 'HSV', 0, 179, callback)
 cv2.createTrackbar('highH', 'HSV', 0, 179, callback)
-cv2.setTrackbarPos('highH', 'HSV', 179)
+cv2.setTrackbarPos('highH', 'HSV', 71)
+cv2.setTrackbarPos('lowH', 'HSV', 61)
 
 cv2.createTrackbar('lowS', 'HSV', 0, 255, callback)
 cv2.createTrackbar('highS', 'HSV', 0, 255, callback)
 cv2.setTrackbarPos('highS', 'HSV', 255)
+cv2.setTrackbarPos('lowS', 'HSV', 87)
 
 cv2.createTrackbar('lowV', 'HSV', 0, 255, callback)
 cv2.createTrackbar('highV', 'HSV', 0, 255, callback)
 cv2.setTrackbarPos('highV', 'HSV', 255)
+cv2.setTrackbarPos('lowV', 'HSV', 66)
 
 kernel = np.array([[0, 1, 0],
                    [1, 1, 1],
@@ -95,16 +92,15 @@ def rectangularity(cnt):
     return area / (w * h)
 
 
-while True:
-    try:
-        frame = camera.read()[1]
-        frame_copy = frame.copy()
-    except AttributeError:
-        continue
+for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    frame = frame.array
+    # clear the stream in preparation for the next frame
+    rawCapture.truncate(0)
+    frame_copy = frame.copy()
 
     hsv = get_hsv()
 
-    frame_hsv = cv2.cvtColor(frame_copy, cv2.COLOR_BGR2HSV)
+    frame_hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(frame_hsv, np.array(hsv['low']), np.array(hsv['high']))
     mask = cv2.dilate(mask, kernel)
     mask = cv2.erode(mask, kernel)
@@ -120,24 +116,25 @@ while True:
 
     if contours:
         for cnt in contours:
-            if 0.8 <= rectangularity(cnt) <= 1:
+            if cv2.contourArea(cnt) > 50:
                 filtered_contours.append(cnt)
-        cv2.drawContours(frame, contours, -1, (0, 0, 255), 3)
+        cv2.drawContours(frame_copy, contours, -1, (255, 0, 0), 3)
 
     if filtered_contours:
         contours.sort(key=cv2.contourArea)
         target = contours[0]
         (x, y), _ = cv2.minEnclosingCircle(target)
-        target_pixels = cv2.boundingRect(target)[3]
+        target_pixels = cv2.boundingRect(target)[2]
 
         distance = (f * target_real) / target_pixels
-        cv2.drawContours(frame, filtered_contours, -1, (0, 255, 0), 3)
-        cv2.putText(frame, str(distance * 100), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 1,
-                    cv2.LINE_AA)
+        cv2.drawContours(frame_copy, filtered_contours, -1, (0, 0, 255), 3)
+        print(distance)
+        # cv2.putText(frame_copy, str(distance * 100), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1,
+        #             cv2.LINE_AA)
         if distance:
             set_item('Distance', distance)
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('frame', frame_copy)
     cv2.imshow('mask', mask_bitwise)
 
     k = cv2.waitKey(1) & 0xFF
