@@ -1,11 +1,13 @@
+import math
+
 import cv2
 import numpy as np
 from networktables import NetworkTables
 from picamera import PiCamera
 from picamera.array import PiRGBArray
 
-target_real = 0.046
-f = 638.6086956521739
+target_real = 1.475
+f = 940
 
 def connection_listener(connected, info):
     if connected:
@@ -21,11 +23,14 @@ NetworkTables.addConnectionListener(connection_listener, immediateNotify=True)
 table = NetworkTables.getTable('Vision')
 
 camera = PiCamera()
+origin_res = camera.resolution
 res = (320, 240)
+focal_ratio = res[0] / origin_res[0]
 camera.resolution = res
 camera.exposure_mode = 'off'
 camera.exposure_compensation = -25
 rawCapture = PiRGBArray(camera, size=res)
+
 
 def set_item(key, value):
     """
@@ -92,6 +97,15 @@ def rectangularity(cnt):
     return area / (w * h)
 
 
+# def y_angle(frame, ytarget):
+#     yframe = frame.shape[0] / 2
+#     return math.atan2((ytarget - yframe), f * focal_ratio) * (180 / math.pi)
+#
+#
+# def distance_by_tan(angle, height_delta):
+#     return height_delta / math.tan(angle)
+
+
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     frame = frame.array
     # clear the stream in preparation for the next frame
@@ -121,16 +135,20 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         cv2.drawContours(frame_copy, contours, -1, (255, 0, 0), 3)
 
     if filtered_contours:
-        contours.sort(key=cv2.contourArea)
-        target = contours[0]
-        (x, y), _ = cv2.minEnclosingCircle(target)
-        target_pixels = cv2.boundingRect(target)[2]
+        filtered_contours.sort(key=cv2.contourArea)
+        target = filtered_contours[-1]
+        # (x, y), _ = cv2.minEnclosingCircle(target)
+        # target_pixels = cv2.contourArea(cnt)
 
-        distance = (f * target_real) / target_pixels
+        print(((cv2.contourArea(target) / (res[0] * res[1]) * 100) ** -0.507) * 0.918)
+        distance = 0
+        # distance = ((f * target_real) / target_pixels ) * focal_ratio
+
+        # focal = (1 * target_pixels) / (target_real * focal_ratio)
         cv2.drawContours(frame_copy, filtered_contours, -1, (0, 0, 255), 3)
         print(distance)
-        # cv2.putText(frame_copy, str(distance * 100), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1,
-        #             cv2.LINE_AA)
+        #cv2.putText(frame_copy, str(distance * 100), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1,
+         #           cv2.LINE_AA)
         if distance:
             set_item('Distance', distance)
 
