@@ -8,6 +8,7 @@ from picamera.array import PiRGBArray
 
 target_real = 1.475
 f = 940
+horizontalFov = 62.2
 
 def connection_listener(connected, info):
     if connected:
@@ -27,8 +28,9 @@ origin_res = camera.resolution
 res = (320, 240)
 focal_ratio = res[0] / origin_res[0]
 camera.resolution = res
-camera.exposure_mode = 'off'
-camera.exposure_compensation = -25
+camera.brightness = 40
+camera.exposure_mode = 'sports'
+camera.exposure_compensation = -10
 rawCapture = PiRGBArray(camera, size=res)
 
 
@@ -41,6 +43,20 @@ def set_item(key, value):
     """
     table.putValue(key, value)
 
+def get_center(cnt: np.array) -> (float, float):
+    """
+    See: cv2.moments()
+    :param cnt: A contour.
+    :return: X and Y coordinate of the center pixel.
+    """
+    # Get center of the contour
+    moment = cv2.moments(cnt)
+    try:
+        x = int(moment['m10'] / moment['m00'])
+        y = int(moment['m01'] / moment['m00'])
+        return x, y
+    except ZeroDivisionError:
+        return None, None
 
 def get_item(key, default_value):
     """
@@ -53,12 +69,16 @@ def get_item(key, default_value):
     return table.getValue(key, default_value)
 
 
+def calc_horizontal_offset(pixelX):
+    focal = res[0] / (2 * math.tan(horizontalFov / 2))
+    return math.degrees(math.atan((pixelX - (res[0] / 2)) / focal))
+
 window = cv2.namedWindow('HSV')
 callback = lambda x: None
 
 cv2.createTrackbar('lowH', 'HSV', 0, 179, callback)
 cv2.createTrackbar('highH', 'HSV', 0, 179, callback)
-cv2.setTrackbarPos('highH', 'HSV', 71)
+cv2.setTrackbarPos('highH', 'HSV', 90)
 cv2.setTrackbarPos('lowH', 'HSV', 61)
 
 cv2.createTrackbar('lowS', 'HSV', 0, 255, callback)
@@ -140,18 +160,21 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         # (x, y), _ = cv2.minEnclosingCircle(target)
         # target_pixels = cv2.contourArea(cnt)
 
-        print(((cv2.contourArea(target) / (res[0] * res[1]) * 100) ** -0.507) * 0.918)
-        distance = 0
+        distance = ((cv2.contourArea(target) / (res[0] * res[1]) * 100) ** -0.507) * 0.918
         # distance = ((f * target_real) / target_pixels ) * focal_ratio
 
         # focal = (1 * target_pixels) / (target_real * focal_ratio)
         cv2.drawContours(frame_copy, filtered_contours, -1, (0, 0, 255), 3)
-        print(distance)
-        #cv2.putText(frame_copy, str(distance * 100), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1,
-         #           cv2.LINE_AA)
-        if distance:
-            set_item('Distance', distance)
+        # cv2.putText(frame_copy, str(distance * 100), (int(x), int(y)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1,
+        #           cv2.LINE_AA)
+        angle = calc_horizontal_offset(get_center(target)[0])
+        set_item('distance', distance)
+        set_item('angle', angle)
 
+        print(distance, angle)
+    else:
+        set_item('distance', 0)
+        set_item('angle', 0)
     cv2.imshow('frame', frame_copy)
     cv2.imshow('mask', mask_bitwise)
 
