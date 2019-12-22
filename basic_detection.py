@@ -10,6 +10,7 @@ target_real = 1.475
 f = 940
 horizontalFov = 62.2
 
+
 def connection_listener(connected, info):
     if connected:
         print('Successfully connected.\n{}'.format(info))
@@ -43,6 +44,7 @@ def set_item(key, value):
     """
     table.putValue(key, value)
 
+
 def get_center(cnt: np.array) -> (float, float):
     """
     See: cv2.moments()
@@ -58,6 +60,7 @@ def get_center(cnt: np.array) -> (float, float):
     except ZeroDivisionError:
         return None, None
 
+
 def get_item(key, default_value):
     """
     Get a value from SmartDashboard.
@@ -72,6 +75,7 @@ def get_item(key, default_value):
 def calc_horizontal_offset(pixelX):
     focal = res[0] / (2 * math.tan(horizontalFov / 2))
     return math.degrees(math.atan((pixelX - (res[0] / 2)) / focal))
+
 
 window = cv2.namedWindow('HSV')
 callback = lambda x: None
