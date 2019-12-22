@@ -5,6 +5,7 @@ import numpy as np
 from networktables import NetworkTables
 from picamera import PiCamera
 from picamera.array import PiRGBArray
+from time import sleep
 
 target_real = 1.475
 f = 940
@@ -24,16 +25,6 @@ NetworkTables.initialize(server=server)
 NetworkTables.addConnectionListener(connection_listener, immediateNotify=True)
 table = NetworkTables.getTable('Vision')
 
-camera = PiCamera()
-origin_res = camera.resolution
-res = (320, 240)
-focal_ratio = res[0] / origin_res[0]
-camera.resolution = res
-camera.brightness = 40
-camera.exposure_mode = 'sports'
-camera.exposure_compensation = -10
-rawCapture = PiRGBArray(camera, size=res)
-
 
 def set_item(key, value):
     """
@@ -43,6 +34,32 @@ def set_item(key, value):
     :param value: The information the key will hold.
     """
     table.putValue(key, value)
+
+
+def get_item(key, default_value):
+    """
+    Get a value from SmartDashboard.
+
+    :param key: The name the value is stored under.
+    :param default_value: The value returned if key holds none.
+    :return: The value that the key holds, default_value if it holds none.
+    """
+    return table.getValue(key, default_value)
+
+
+set_item('FPS', 30)
+set_item('Latency (ms)', 0)
+
+camera = PiCamera()
+origin_res = camera.resolution
+res = (320, 240)
+focal_ratio = res[0] / origin_res[0]
+camera.resolution = res
+camera.brightness = 40
+camera.exposure_mode = 'sports'
+camera.exposure_compensation = -10
+camera.framerate = get_item('FPS', 30)
+rawCapture = PiRGBArray(camera, size=res)
 
 
 def get_center(cnt: np.array) -> (float, float):
@@ -59,17 +76,6 @@ def get_center(cnt: np.array) -> (float, float):
         return x, y
     except ZeroDivisionError:
         return None, None
-
-
-def get_item(key, default_value):
-    """
-    Get a value from SmartDashboard.
-
-    :param key: The name the value is stored under.
-    :param default_value: The value returned if key holds none.
-    :return: The value that the key holds, default_value if it holds none.
-    """
-    return table.getValue(key, default_value)
 
 
 def calc_horizontal_offset(pixelX):
@@ -131,6 +137,8 @@ def rectangularity(cnt):
 
 
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    sleep(get_item('Latency (ms)', 0) / 1000)
+    camera.framerate = get_item('FPS', 30)
     frame = frame.array
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
