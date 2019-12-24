@@ -381,3 +381,4 @@ settings\.txt
 
 values/
 recordings/
+*.csv

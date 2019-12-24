@@ -15,6 +15,7 @@ from pi_camera import PICamera
 from realsense import RealSense
 from trackbars import Trackbars
 from web import Web
+from logger import Logger
 
 logging.basicConfig(format='[%(levelname)s] %(message)s', level=logging.INFO, handlers=[
     logging.FileHandler('vision.log', mode='w'),
@@ -37,7 +38,10 @@ def get_args():
     -networktables/-nt : bool
         whether the measurements will be sent to the networktables server
         :name networktables
-        :default
+        :default False
+    -help_main/-hm : bool
+        whether the help() for main will be shown upon launch
+        :default False
     -local : bool
         whether the display frame will be shown on current screen
         :name local
@@ -47,14 +51,14 @@ def get_args():
         :name camera
         :options 'cv', 'pi', 'realsense'
         :default 'cv'
-    -port : int
+    -port/-p : int
         the port in which the camera is inserted
         :name port
         :default 0
     -target : str
         the name of the target being recognised
         :name target
-        :default example_target
+        :default 'example_target'
     -robot : str
         the robot on which the processor is mounted
         :name robot
@@ -67,9 +71,14 @@ def get_args():
     parser.add_argument('-no-web', action='store_false', default=True,
                         dest='web',
                         help='Disable web server UI')
+    # Add networktables argument
     parser.add_argument('-networktables', '-nt', action='store_true', default=False,
                         dest='networktables',
                         help='Initiate network tables')
+    # Add help in main argument
+    parser.add_argument('-help-main', '-hm', action='store_true', default=False,
+                        dest='help_main',
+                        help='Display the main\'s documentation')
     # Add local ui argument
     parser.add_argument('-local', action='store_true', default=False,
                         dest='local',
@@ -156,6 +165,8 @@ class Main:
         if self.results.networktables:
             self.nt = nt_handler.NT(self.name)
 
+        self.logger = Logger(self)
+
         self.stop = False
 
     def change_name(self, name):
@@ -196,7 +207,7 @@ class Main:
         # Change camera exposure based on the target
         self.display.change_exposure(target.exposure)
         # Timer for FPS counter
-        timer = time.time()
+        self.timer = time.time()
         avg = 0
         while True:
             # Get initial frame
@@ -208,25 +219,30 @@ class Main:
                     printed = True
                 continue
             else:
+                self.logger.record_latency()
                 printed = False
             # Copy the initial frame for analysis and display, respectively
             original = frame.copy()
             contour_image = frame.copy()
+            # Show FPS
+            avg = utils.calculate_fps(contour_image, time.time(), self.timer, avg)
+            self.timer = time.time()
             # Create a mask
             mask = target.create_mask(frame, self.hsv_handler.get_hsv())
             # Get all contours
             contours, hierarchy = target.find_contours(mask)
+            self.is_potential_target = bool(contours)
             # Filter contours
             filtered_contours = target.filter_contours(contours, hierarchy)
+            self.is_target = bool(filtered_contours)
             # Draw contours
             target.draw_contours(filtered_contours, contour_image)
+            self.logger.record_contours()
             # Find distance, angle, and other measurements if stated
             angle, distance, field_angle, additional_data = target.measurements(contour_image, filtered_contours)
-            # Show FPS
-            avg = utils.calculate_fps(contour_image, time.time(), timer, avg)
-            timer = time.time()
-            # Stream frame
-            self.web.frame = contour_image
+            if self.results.web:
+                # Stream frame
+                self.web.frame = contour_image
             # Display frame
             self.display.process_frame(contour_image, 'image', self.results.local)
             # Display mask
@@ -255,5 +271,7 @@ class Main:
 
 
 if __name__ == '__main__':
-    help(Main)
-    Main().loop()
+    main = Main()
+    if main.results.help_main:
+        help(main)
+    main.loop()

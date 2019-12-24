@@ -1,5 +1,4 @@
 import cv2
-
 import utils
 import constants
 from targets.target_base import TargetBase
@@ -7,6 +6,9 @@ from targets.target_base import TargetBase
 
 class Target(TargetBase):
     """The cargo in the 2019."""
+    def __init__(self, main):
+        super().__init__(main)
+        self.exposure = 25
 
     def create_mask(self, frame, hsv):
         mask = utils.hsv_mask(frame, hsv)
@@ -56,20 +58,33 @@ class Target(TargetBase):
                 center = int(a), int(b)
                 cv2.circle(original, center, int(radius), (0, 255, 0), 5)
 
+    def measurements(self, frame, contours):
+        distances = []
+        distance = None
+        angle = None
+        x = None
+        y = None
+        f = 0
+        if contours and self.main.results.camera == 'realsense':
+            for cnt in contours:
+                (x, y) = utils.center(cnt)
+                distances.append(self.main.display.camera_provider.get_distance(x, y))
+            distance = min(distances)
+            closest = contours[distances.index(distance)]
+            (x, y) = utils.center(closest)
+            angle = utils.angle(constants.FOCAL_LENGTHS['realsense'], x, frame)
+        elif contours:
+            for cnt in contours:
+                (x, y) = utils.center(cnt)
+                f = constants.FOCAL_LENGTHS[self.main.results.camera]
 
-def measurements(self, frame, contours):
-    distances = []
-    distance = None
-    angle = None
-    if contours and self.main.results.camera == 'realsense':
-        for cnt in contours:
-            (x, y) = utils.center(cnt)
-            distances.append(self.main.display.camera_provider.get_distance(x, y))
-        distance = min(distances)
-        closest = contours[distances.index(distance)]
-        (x, y) = utils.center(closest)
-        angle = utils.angle(constants.FOCAL_LENGTHS['realsense'], x, frame)
+                radius = cv2.minEnclosingCircle(cnt)[1]
+                distances.append(utils.distance(f, constants.GAME_PIECE_SIZES['cargo']['diameter'],
+                                                2*radius))
+                angle = utils.angle(f, x, frame)
+            distance = distances[0]
         if distance:
-            cv2.putText(frame, str(int(distance * 100)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
+            cv2.putText(frame, str(distance * 100), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
                         cv2.LINE_AA)
-    return distance, angle, None, None
+
+        return angle, distance, None, None
