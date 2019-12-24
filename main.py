@@ -4,7 +4,7 @@ import sys
 import time
 from importlib import import_module
 
-import cv2
+import cv2,web
 
 import nt_handler
 import utils
@@ -272,6 +272,10 @@ class Main:
                 # Release the camera and close all windows
                 self.display.release()
                 break
+
+            if k in (29, 115):
+                self.main.hsv_handler.save_hsv_values()
+                print('saving HSV')
 
 
 if __name__ == '__main__':
