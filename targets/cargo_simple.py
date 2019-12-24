@@ -60,18 +60,19 @@ class Target(TargetBase):
                 cv2.circle(original, center, int(radius), (0, 255, 0), 5)
 
     def measurements(self, frame, contours):
+        data = []
         distances = []
-        distance = None
-        angle = None
+        data[1] = None #distance
+        data[0] = None #angle
         if contours and self.main.results.camera == 'realsense':
             for cnt in contours:
                 (x, y) = utils.center(cnt)
                 distances.append(self.main.display.camera_provider.get_distance(x, y))
-            distance = min(distances)
-            closest = contours[distances.index(distance)]
+            data[0] = min(distances)
+            closest = contours[distances.index(data[1])]
             (x, y) = utils.center(closest)
-            angle = utils.angle(constants.FOCAL_LENGTHS['realsense'], x, frame)
-            if distance:
-                cv2.putText(frame, str(int(distance * 100)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
+            data[1] = utils.angle(constants.FOCAL_LENGTHS['realsense'], x, frame)
+            if data[1]:
+                cv2.putText(frame, str(int(data[1] * 100)), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 2, (0, 0, 255), 1,
                             cv2.LINE_AA)
-        return distance, angle, None, None
+        return data

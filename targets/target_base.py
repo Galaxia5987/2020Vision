@@ -47,12 +47,13 @@ class TargetBase(ABC):
 
     @staticmethod
     def measurements(frame, cnt) -> Tuple[Optional[float], Optional[float], Optional[float]]:
+        data = []
         """
         Return the angle and distance from a single target.
         :param frame: The frame, used for angle measurement
         :param cnt: The contour of the target
         """
-        return None, None, None, None
+        return data
 
     @staticmethod
     @abstractmethod

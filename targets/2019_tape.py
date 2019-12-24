@@ -17,6 +17,7 @@ class Target(TargetBase):
 
     def measurements(self, original, contours, rocket_hatch: bool = False, rocket_cargo: bool = False,
                      calculate: bool = True):
+        data = []
         pairs = self.get_pairs(contours)
         if not pairs:
             return None, None, None, None
@@ -29,22 +30,24 @@ class Target(TargetBase):
         #     pair = self.get_right_pair(pairs)
         pair = self.get_center_pair(pairs)
 
-        angle = None
-        horizontal_distance = None
-        field_angle = None
+        data[0] = None #angle
+        data[1] = None #horizontal_distance
+        data[2] = None #field_angle
 
         if calculate:
-            angle, horizontal_distance, field_angle = self.calculate(pair, original)
+            data[0], data[1],  data[2] = self.calculate(pair, original)
 
         x, y, w, h = cv2.boundingRect(pair[0])
         x2, y2, w2, h2 = cv2.boundingRect(pair[1])
 
         # Put measurements on image
-        utils.put_number(angle, x + w, y + h, original)
-        if horizontal_distance is not None:
-            utils.put_number(horizontal_distance * 100, x2, y2, original)
-        utils.put_number(field_angle, x, y, original)
-        return angle, horizontal_distance, field_angle, [pair, pairs]
+        utils.put_number(data[0], x + w, y + h, original)
+        if data[1] is not None:
+            utils.put_number(data[1] * 100, x2, y2, original)
+        utils.put_number(data[2], x, y, original)
+        data[3] = pair
+        data [4] = pairs
+        return data
 
     def calculate(self, pair, original):
         if pair is None: return None, None, None

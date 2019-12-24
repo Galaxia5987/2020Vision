@@ -239,7 +239,11 @@ class Main:
             target.draw_contours(filtered_contours, contour_image)
             self.logger.record_contours()
             # Find distance, angle, and other measurements if stated
-            angle, distance, field_angle, additional_data = target.measurements(contour_image, filtered_contours)
+            data = target.measurements(contour_image, filtered_contours)
+            angle = data[0]
+            distance = data[1]
+            field_angle = data[3]
+            additional_data = data[4]
             if self.results.web:
                 # Stream frame
                 self.web.frame = contour_image
