@@ -88,4 +88,3 @@ class Target(TargetBase):
                         cv2.LINE_AA)
 
         return angle, distance, None, None
-

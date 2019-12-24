@@ -420,14 +420,13 @@ def array8(arr: iter) -> np.array:
     """
     return np.array(arr, dtype=np.uint8)
 
-
-def approx_hull(cnt: np.array) -> np.array:
+def approx_hull(cnt, ratio=0.015):
     """
     :param cnt: A contour.
     :return: The contour with less points. Magnitude defined by inner variable epsilon.
     """
     hull = cv2.convexHull(cnt)
-    epsilon = 0.015 * cv2.arcLength(hull, True)
+    epsilon = ratio * cv2.arcLength(hull, True)
     return cv2.approxPolyDP(hull, epsilon, True)
 
 
@@ -437,7 +436,7 @@ def points(cnt: np.array) -> list:
     :param cnt: A contour.
     :return: A list of the the approximated points - the polygons points - in an [x, y] format
     """
-    hullpoints = list(cv2.convexHull(approx_hull(cnt), returnPoints=True))
+    hullpoints = list(cv2.convexHull(approx_hull(cnt, ratio=0.005), returnPoints=True))
     hullpoints.sort(key=index00)
 
     points = []
@@ -479,6 +478,33 @@ def is_triangle(cnt, ratio=0.07) -> bool:
     :return: Whether the approximated polygon has 3 points.
     """
     return approx_poly(cnt, ratio) == 3
+
+
+def rectangularity(cnt,operation):
+    """
+
+    :param cnt:
+    :return:
+    """
+    convex = cv2.convexHull(cnt)
+    convex_area = cv2.contourArea(convex)
+    con_box = box(cnt)
+    x1 = con_box[0][0]
+    x2 = con_box[1][0]
+    x3 = con_box[2][0]
+    y1 = con_box[0][1]
+    y2 = con_box[1][1]
+    y3 = con_box[2][1]
+    box_area = math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2) * (math.sqrt((x2 - x3) ** 2 + (y2 - y3) ** 2))
+    # return the points of the box
+    if operation == "return":
+        return x1, x2, x3, y1, y2, y3
+    # check if the contour is a square
+    if operation == "check":
+        try:
+            return convex_area / box_area
+        except ZeroDivisionError:
+            return 0
 
 
 def numpy_index(element, arrays: list):
