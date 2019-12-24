@@ -1,9 +1,10 @@
 import cv2
 import numpy as np
 import datetime
-# import led_toggle
+import led_toggle
 from file_hsv import FileHSV
 import utils
+from time import sleep
 
 
 def log(info):
@@ -24,7 +25,7 @@ kernel = np.array([[0, 1, 0],
                    [1, 1, 1],
                    [0, 1, 0]], dtype=np.uint8)
 
-# led_toggle.on()
+led_toggle.on()
 led_time = datetime.datetime.now()
 log(f'On: {float(led_time.microsecond)};')
 
@@ -57,5 +58,12 @@ while True:
 
             cv2.imwrite('led.jpg', orginal)
 
-            # led_toggle.off()
+            led_toggle.off()
             break
+
+    if float(datetime.datetime.now().microsecond) - float(led_time.microsecond) >= 300:
+        led_toggle.off()
+        sleep(1)
+        led_toggle.on()
+        led_time = datetime.datetime.now()
+        continue
