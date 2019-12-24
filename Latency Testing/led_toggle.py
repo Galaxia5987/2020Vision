@@ -1,11 +1,11 @@
 import RPi.GPIO as GPIO
 
 
-def __int__():
-    GPIO.setmode(GPIO.BCM)
+def __init__():
+    GPIO.setmode(GPIO.BCM) 
     GPIO.setwarnings(False)
+    GPIO.cleanup(18) 
     GPIO.setup(18, GPIO.OUT)
-
 
 def on():
     print("LED on")

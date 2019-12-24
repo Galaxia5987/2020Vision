@@ -2,9 +2,17 @@ import cv2
 import numpy as np
 import datetime
 import led_toggle
-from ... import file_hsv
-import utils
 from time import sleep
+
+import os, sys, inspect
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+
+import file_hsv
+import utils
+
+led_toggle.__init__()
 
 
 def log(info):
@@ -17,9 +25,11 @@ def log(info):
 
 
 cam = cv2.VideoCapture(0)
-cam.set(15, -10)
+cam.set(15, -5)
+# cam.set(11, 7)
 
 hsv_handler = file_hsv.FileHSV(name='led', up=1)
+print(hsv_handler.get_hsv())
 
 kernel = np.array([[0, 1, 0],
                    [1, 1, 1],
@@ -32,7 +42,9 @@ log(f'On: {float(led_time.microsecond)};')
 orginal = cam.read()[1]
 cv2.imwrite('start.jpg', orginal)
 
-while True:
+stop = False
+
+while not stop:
     orginal = cam.read()[1]
     frame = orginal.copy()
 
@@ -45,23 +57,23 @@ while True:
     contours = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
     if contours:
 
-        fitered_contours = []
+        filtered_contours = []
 
         for cnt in contours:
-            if 1000 < cv2.contourArea(cnt) < 10000:
-                fitered_contours.append(cnt)
+            if 1000 < cv2.contourArea(cnt):
+                filtered_contours.append(cnt)
 
-        if fitered_contours:
+        if filtered_contours:
             detect_time = datetime.datetime.now()
-            log(f'Delay: {float(detect_time.microsecond) - float(led_time.microsecond)};')
-            cv2.drawContours(orginal, contours, -1, (255, 255, 255), 3)
+            log(f'Delay: {(float(detect_time.microsecond) - float(led_time.microsecond)) / 1000};')
+            cv2.drawContours(orginal, filtered_contours, -1, (255, 0, 0), 3)
 
             cv2.imwrite('led.jpg', orginal)
 
             led_toggle.off()
-            break
+            stop = True
 
-    if float(datetime.datetime.now().microsecond) - float(led_time.microsecond) >= 300:
+    if float(datetime.datetime.now().microsecond) - float(led_time.microsecond) >= 500:
         led_toggle.off()
         sleep(1)
         led_toggle.on()
