@@ -26,9 +26,7 @@ kernel = np.array([[0, 1, 0],
 
 # led_toggle.on()
 led_time = datetime.datetime.now()
-log(f'{led_time.__str__()};')
-
-# datetime.timedelta(led_time.microsecond - datetime.datetime.now().microsecond) < datetime.timedelta(microseconds=75000)
+log(f'On: {float(led_time.microsecond)};')
 
 orginal = cam.read()[1]
 cv2.imwrite('start.jpg', orginal)
@@ -54,7 +52,7 @@ while True:
 
         if fitered_contours:
             detect_time = datetime.datetime.now()
-            log(f'{datetime.timedelta(detect_time.microsecond - led_time.microsecond).microseconds};')
+            log(f'Delay: {float(detect_time.microsecond) - float(led_time.microsecond)};')
             cv2.drawContours(orginal, contours, -1, (255, 255, 255), 3)
 
             cv2.imwrite('led.jpg', orginal)
