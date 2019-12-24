@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import datetime
 import led_toggle
-from ..file_hsv import FileHSV
+from .. import file_hsv
 import utils
 from time import sleep
 
@@ -19,7 +19,7 @@ def log(info):
 cam = cv2.VideoCapture(0)
 cam.set(15, -10)
 
-hsv_handler = FileHSV(name='led', up=1)
+hsv_handler = file_hsv.FileHSV(name='led', up=1)
 
 kernel = np.array([[0, 1, 0],
                    [1, 1, 1],
