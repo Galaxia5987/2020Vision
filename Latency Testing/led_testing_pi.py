@@ -52,7 +52,7 @@ for original in cam.capture_continuous(rawCapture, format="bgr", use_video_port=
         original = original.array
         # clear the stream in preparation for the next frame
         rawCapture.truncate(0)
-        frame = orginal.copy()
+        frame = original.copy()
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
