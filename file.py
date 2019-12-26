@@ -24,7 +24,7 @@ class File:
         - the extension of the file
     """
 
-    def __init__(self, name: str, default, folder: str, extension: str):
+    def __init__(self, name: str, default, folder: str, extension: str, up=0):
         """
         Instantiate a file.
         :param name: The name of the target to associate the file with.
