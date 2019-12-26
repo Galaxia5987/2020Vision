@@ -45,9 +45,6 @@ led_toggle.on()
 led_time = datetime.datetime.now()
 log(f'On: {float(led_time.microsecond)};')
 
-orginal = cam.read()[1]
-cv2.imwrite('start.jpg', orginal)
-
 stop = False
 
 for original in cam.capture_continuous(rawCapture, format="bgr", use_video_port=True):
