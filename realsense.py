@@ -98,7 +98,7 @@ class RealSense:
         """
         Set the exposure to a desired value. May not set the camera to the exact value, so the actual exposure of the
         camera is logged.
-        :param exposure: Exposure to se the camera to.
+        :param exposure: Exposure to set the camera to.
         """
         s = self.prof.get_device().query_sensors()[1]
         s.set_option(self.rs_options.enable_auto_exposure, 0)
