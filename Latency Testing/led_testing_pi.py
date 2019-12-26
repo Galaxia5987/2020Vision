@@ -74,10 +74,10 @@ for original in cam.capture_continuous(rawCapture, format="bgr", use_video_port=
 
                 detect_time = datetime.datetime.now()
                 log(f'Delay: {(float(detect_time.microsecond) - float(led_time.microsecond)) / 1000};')
-                cv2.drawContours(orginal, contours, -1, (255, 0, 0), 3)
+                cv2.drawContours(original, contours, -1, (255, 0, 0), 3)
                 # and this shrinks it by 300 to 20 ms
 
-                cv2.imwrite('led.jpg', orginal)
+                cv2.imwrite('led.jpg', original)
 
                 led_toggle.off()
                 stop = True
