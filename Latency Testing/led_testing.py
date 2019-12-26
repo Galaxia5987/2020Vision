@@ -53,10 +53,10 @@ while not stop:
     mask = utils.hsv_mask(frame, hsv_handler.get_hsv())
 
     mask = utils.morphology(mask, kernel)
+    # this line adds ~100 ms delay!!
 
     contours = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
     if contours:
-
         filtered_contours = []
 
         for cnt in contours:
@@ -64,9 +64,12 @@ while not stop:
                 filtered_contours.append(cnt)
 
         if filtered_contours:
+        # the filtering removed another ~300 ms...
+
             detect_time = datetime.datetime.now()
             log(f'Delay: {(float(detect_time.microsecond) - float(led_time.microsecond)) / 1000};')
-            cv2.drawContours(orginal, filtered_contours, -1, (255, 0, 0), 3)
+            cv2.drawContours(orginal, contours, -1, (255, 0, 0), 3)
+            # and this shrinks it by 300 to 20 ms
 
             cv2.imwrite('led.jpg', orginal)
 
